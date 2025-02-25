@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/api-gateway/src",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "apps/api-gateway/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/cti-sharing-federated",
+  "projects": {
+    "api-gateway": {
+      "type": "application",
+      "root": "apps/api-gateway",
+      "entryFile": "main",
+      "sourceRoot": "apps/api-gateway/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/api-gateway/tsconfig.app.json"
+      }
+    },
+    "users-management": {
+      "type": "application",
+      "root": "apps/users-management",
+      "entryFile": "main",
+      "sourceRoot": "apps/users-management/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/users-management/tsconfig.app.json"
+      }
+    },
+    "cti-management": {
+      "type": "application",
+      "root": "apps/cti-management",
+      "entryFile": "main",
+      "sourceRoot": "apps/cti-management/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/cti-management/tsconfig.app.json"
+      }
+    },
+    "reputation-management": {
+      "type": "application",
+      "root": "apps/reputation-management",
+      "entryFile": "main",
+      "sourceRoot": "apps/reputation-management/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/reputation-management/tsconfig.app.json"
+      }
+    },
+    "common-lib": {
+      "type": "library",
+      "root": "libs/common-lib",
+      "entryFile": "index",
+      "sourceRoot": "libs/common-lib/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/common-lib/tsconfig.lib.json"
+      }
+    }
+  }
+}
