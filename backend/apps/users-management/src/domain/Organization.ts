@@ -3,6 +3,7 @@ import { Result } from '@app/common-lib/core/logic/Result';
 
 interface OrganizationProps {
   name: string;
+  password: string;
   description: string;
   reputation: number;
   createdAt: Date;
@@ -15,12 +16,24 @@ export class Organization extends Entity<OrganizationProps> {
     super(props, id);
   }
 
+  get id(): string {
+    return this._id.toString();
+  }
+
   get name(): string {
     return this.props.name;
   }
 
   set name(value: string) {
     this.props.name = value;
+  }
+
+  get password(): string {
+    return this.props.password;
+  }
+
+  set password(value: string) {
+    this.props.password = value;
   }
 
   get description(): string {

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { UsersManagementModule } from './../src/users-management.module';
+import { UsersManagementModule } from '../users-management.module';
 
 describe('UsersManagementController (e2e)', () => {
   let app: INestApplication;

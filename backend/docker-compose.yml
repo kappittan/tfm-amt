@@ -1,0 +1,17 @@
+# Use root/example as user/password credentials
+version: '3.1'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: tfm-postgres
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: test
+
+    # (this is just an example, not intended to be a production configuration)
