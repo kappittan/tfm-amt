@@ -1,6 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersModule } from './src/users.module';
+import { UsersModule } from './src/modules/organizations/users.module';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from '@app/common-lib/auth/auth.guard';
+import { AuthModule } from './src/modules/auth/auth.module';
+import { RolesGuard } from '@app/common-lib/auth/roles.guard';
 
 @Module({
   imports: [
@@ -16,6 +20,14 @@ import { UsersModule } from './src/users.module';
       logging: false,
     }),
     UsersModule,
+    AuthModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+    { provide: APP_GUARD, useClass: RolesGuard },
   ],
 })
 export class UsersManagementModule {}

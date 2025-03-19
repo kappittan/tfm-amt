@@ -1,0 +1,13 @@
+import { DomainError } from '@app/common-lib/core/exceptions/domain-error';
+import { Result } from '@app/common-lib/core/logic/Result';
+import { Exception } from '../../../../../../libs/common-lib/src/core/exceptions/Exception';
+
+export class OrganizationNotFound extends Exception {
+  private constructor(id: string) {
+    super(`The organization with id "${id}" does not exist`);
+  }
+
+  public static create(id: string): OrganizationNotFound {
+    return new OrganizationNotFound(id);
+  }
+}

@@ -1,0 +1,43 @@
+/* styles.css */
+
+/* Importar una tipografía de Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap');
+
+/* Estilos generales */
+body {
+    background-color: #2D0B45; /* Morado oscuro */
+    color: #ffffff; /* Texto blanco para contraste */
+    font-family: 'Poppins', sans-serif; /* Tipografía personalizada */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    text-align: center;
+}
+
+/* Ajustes para los títulos */
+h1, h2, h3 {
+    font-weight: 700;
+    color: #FFD700; /* Amarillo dorado para destacar */
+}
+
+/* Ajustes para los párrafos */
+p {
+    font-weight: 300;
+    line-height: 1.6;
+}
+
+/* Ajustes para enlaces */
+a {
+    color: #FF69B4; /* Rosa neón */
+    text-decoration: none;
+    transition: 0.3s ease-in-out;
+}
+
+a:hover {
+    color: #FF1493; /* Un tono más oscuro al pasar el mouse */
+    text-decoration: underline;
+}
