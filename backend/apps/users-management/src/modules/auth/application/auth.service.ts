@@ -22,7 +22,7 @@ export class AuthService {
   ): Promise<
     Either<
       AuthModuleException.UnauthorizedUser | AuthModuleException.UserNotFound,
-      { access_token: string }
+      { access_token: string; user_id: string; username: string }
     >
   > {
     const result = await this.usersService.getOrganizationByName(username);
@@ -45,6 +45,8 @@ export class AuthService {
     };
     return right({
       access_token: await this.jwtService.signAsync(payload),
+      user_id: organization.id,
+      username: organization.name,
     });
   }
 }

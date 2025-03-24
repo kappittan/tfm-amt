@@ -1,9 +1,18 @@
 import { StatusCodes } from "http-status-codes";
 import { useState } from "react";
-import { Alert, Button, Col, Container, Form, Row } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import {
+  Alert,
+  Button,
+  Col,
+  Container,
+  Form,
+  ListGroup,
+  Row,
+} from "react-bootstrap";
+import { Link, useNavigate } from "react-router-dom";
 
 export function LoginForm() {
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
@@ -30,68 +39,72 @@ export function LoginForm() {
       body: JSON.stringify({ username, password }),
     });
 
-    if (response.status === StatusCodes.OK) {
-      setAlertVariant("success");
-      setAlertHeader("Login successful");
-      setAlertMessage("You have successfully logged in.");
-      setShowAlert(true);
+    if (response.ok) {
+      const data = await response.json();
+      localStorage.setItem("token", data.access_token);
+      localStorage.setItem("user_id", data.user_id);
+      localStorage.setItem("username", data.username);
+
+      navigate("/dashboard");
     } else {
-      setAlertVariant("danger");
-      setAlertHeader("Error");
-      setAlertMessage("An error occurred while logging in.");
-      setShowAlert(true);
+      alert("Error");
     }
   }
 
   return (
     <div>
-      <Alert
-        show={showAlert}
-        variant={alertVariant}
-        dismissible
-        onClose={() => {
-          setShowAlert(false);
-        }}
-      >
-        <Alert.Heading>{alertHeader}</Alert.Heading>
-        <p>{alertMessage}</p>
-      </Alert>
-      <Form>
-        <Container>
-          <Row>
-            <Form.Group controlId="formName">
-              <Form.Label>Organization name</Form.Label>
-              <Form.Control
-                type="email"
-                placeholder="Enter email"
-                value={username}
-                onChange={handleChangeUsername}
-              />
-            </Form.Group>
-          </Row>
-          <Row>
-            <Form.Group controlId="formPassword">
-              <Form.Label>Password</Form.Label>
-              <Form.Control
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={handleChangePassword}
-              />
-            </Form.Group>
-          </Row>
-          <Row>
-            <Button variant="primary" type="submit" onClick={handleSubmit}>
-              Log in
-            </Button>
-          </Row>
-          <Row>
-            <Form.Text className="text-muted">
-              Don't have an account? <Link to="/register">Register</Link>
-            </Form.Text>
-          </Row>
-        </Container>
-      </Form>
+      <Container fluid>
+        <ListGroup style={{ backgroundColor: "#D1A3FF" }}>
+          <Form>
+            <Container fluid>
+              <Row className="my-2">
+                <Form.Group controlId="formName">
+                  <Form.Label>Organization name</Form.Label>
+                  <Form.Control
+                    type="email"
+                    placeholder="Enter email"
+                    value={username}
+                    onChange={handleChangeUsername}
+                  />
+                </Form.Group>
+              </Row>
+            </Container>
+            <Container fluid>
+              <Row className="my-2">
+                <Form.Group controlId="formPassword">
+                  <Form.Label>Password</Form.Label>
+                  <Form.Control
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={handleChangePassword}
+                  />
+                </Form.Group>
+              </Row>
+            </Container>
+            <Row className="my-4">
+              <Col></Col>
+              <Col>
+                <Row>
+                  <Button
+                    variant="primary"
+                    type="submit"
+                    onClick={handleSubmit}
+                  >
+                    Log in
+                  </Button>
+                </Row>
+              </Col>
+              <Col></Col>
+            </Row>
+            <Row className="my-2 text-center">
+              <Form.Text className="text-muted">
+                Don't have an account? <Link to="/register">Register</Link>
+              </Form.Text>
+            </Row>
+          </Form>
+        </ListGroup>
+      </Container>
     </div>
   );
 }

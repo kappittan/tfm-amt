@@ -47,6 +47,6 @@ export class AuthController {
 
     res.status(HttpStatus.OK);
     res.json(result.value);
-    res.send();
+    res.end();
   }
 }

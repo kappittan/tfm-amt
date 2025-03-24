@@ -87,9 +87,9 @@ const common_1 = __webpack_require__(3);
 const users_controller_1 = __webpack_require__(6);
 const users_service_1 = __webpack_require__(8);
 const typeorm_1 = __webpack_require__(4);
-const Persistence = __webpack_require__(32);
+const Persistence = __webpack_require__(33);
 const users_repository_1 = __webpack_require__(19);
-const users_repository_typeorm_1 = __webpack_require__(35);
+const users_repository_typeorm_1 = __webpack_require__(36);
 let UsersModule = class UsersModule {
 };
 exports.UsersModule = UsersModule;
@@ -126,7 +126,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e;
+var UsersController_1;
+var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UsersController = void 0;
 const common_1 = __webpack_require__(3);
@@ -135,11 +136,12 @@ const users_service_1 = __webpack_require__(8);
 const create_organization_dto_1 = __webpack_require__(29);
 const UserModuleException = __webpack_require__(22);
 const public_decorator_1 = __webpack_require__(31);
-let UsersController = class UsersController {
+const organization_mapper_1 = __webpack_require__(32);
+let UsersController = UsersController_1 = class UsersController {
     constructor(usersService) {
         this.usersService = usersService;
     }
-    processException(exception, res) {
+    static processException(exception, res) {
         switch (exception.constructor) {
             case UserModuleException.PasswordIsNotValid:
                 res.status(common_1.HttpStatus.CONFLICT);
@@ -170,7 +172,7 @@ let UsersController = class UsersController {
     async createOrganization(createOrganizationDto, res) {
         const result = await this.usersService.createOrganization(createOrganizationDto);
         if (result.isLeft()) {
-            this.processException(result.value, res);
+            UsersController_1.processException(result.value, res);
         }
         else {
             const organization = result.value;
@@ -180,14 +182,16 @@ let UsersController = class UsersController {
             res.send();
         }
     }
-    async getAllOrganizations() {
+    async getAllOrganizations(res) {
         const result = await this.usersService.getAllOrganizations();
-        return result;
+        res.status(common_1.HttpStatus.OK);
+        res.json({ data: result.map((org) => organization_mapper_1.OrganizationMapper.toDto(org)) });
+        res.end();
     }
     async getOrganizationById(res, id) {
         const result = await this.usersService.getOrganizationById(id);
         if (result.isLeft()) {
-            this.processException(result.value, res);
+            UsersController_1.processException(result.value, res);
         }
         else {
             res.status(common_1.HttpStatus.OK);
@@ -198,7 +202,7 @@ let UsersController = class UsersController {
     async getOrganizationByName(res, name) {
         const result = await this.usersService.getOrganizationByName(name);
         if (result.isLeft()) {
-            this.processException(result.value, res);
+            UsersController_1.processException(result.value, res);
         }
         else {
             res.status(common_1.HttpStatus.OK);
@@ -218,9 +222,11 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "createOrganization", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Res)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [typeof (_d = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _d : Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getAllOrganizations", null);
 __decorate([
@@ -228,7 +234,7 @@ __decorate([
     __param(0, (0, common_1.Res)()),
     __param(1, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_d = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _d : Object, String]),
+    __metadata("design:paramtypes", [typeof (_e = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _e : Object, String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getOrganizationById", null);
 __decorate([
@@ -236,10 +242,10 @@ __decorate([
     __param(0, (0, common_1.Res)()),
     __param(1, (0, common_1.Param)('name')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _e : Object, String]),
+    __metadata("design:paramtypes", [typeof (_f = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _f : Object, String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getOrganizationByName", null);
-exports.UsersController = UsersController = __decorate([
+exports.UsersController = UsersController = UsersController_1 = __decorate([
     (0, common_1.Controller)('organizations'),
     __metadata("design:paramtypes", [typeof (_a = typeof users_service_1.UsersService !== "undefined" && users_service_1.UsersService) === "function" ? _a : Object])
 ], UsersController);
@@ -880,13 +886,61 @@ exports.Public = Public;
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Organization = void 0;
-const Organization_1 = __webpack_require__(33);
-Object.defineProperty(exports, "Organization", ({ enumerable: true, get: function () { return Organization_1.Organization; } }));
+exports.OrganizationMapper = void 0;
+const UniqueEntityID_1 = __webpack_require__(12);
+const Domain = __webpack_require__(9);
+class OrganizationMapper {
+    static async toDomain(raw) {
+        const password = await Domain.Password.create({
+            value: raw.password,
+            hashed: true,
+        });
+        const organization = Domain.Organization.create({
+            roles: raw.roles,
+            name: raw.name,
+            password: password.getValue(),
+            description: raw.description,
+            reputation: raw.reputation,
+            createdAt: raw.createdAt,
+        }, new UniqueEntityID_1.UniqueEntityID(raw.id));
+        return organization.getValue();
+    }
+    static toPersistence(org) {
+        return {
+            id: org.id,
+            roles: org.roles,
+            name: org.name,
+            password: org.password.value,
+            description: org.description,
+            reputation: org.reputation,
+            createdAt: org.createdAt,
+        };
+    }
+    static toDto(org) {
+        return {
+            id: org.id,
+            name: org.name,
+            description: org.description,
+            reputation: org.reputation,
+        };
+    }
+}
+exports.OrganizationMapper = OrganizationMapper;
 
 
 /***/ }),
 /* 33 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Organization = void 0;
+const Organization_1 = __webpack_require__(34);
+Object.defineProperty(exports, "Organization", ({ enumerable: true, get: function () { return Organization_1.Organization; } }));
+
+
+/***/ }),
+/* 34 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -903,7 +957,7 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Organization = void 0;
 const role_enum_1 = __webpack_require__(28);
-const typeorm_1 = __webpack_require__(34);
+const typeorm_1 = __webpack_require__(35);
 let Organization = class Organization {
 };
 exports.Organization = Organization;
@@ -944,13 +998,13 @@ exports.Organization = Organization = __decorate([
 
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ ((module) => {
 
 module.exports = require("typeorm");
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -972,9 +1026,9 @@ exports.OrganizationRepositoryTypeOrm = void 0;
 const common_1 = __webpack_require__(3);
 const users_repository_1 = __webpack_require__(19);
 const typeorm_1 = __webpack_require__(4);
-const Persistence = __webpack_require__(32);
-const Repository_1 = __webpack_require__(36);
-const organization_mapper_1 = __webpack_require__(37);
+const Persistence = __webpack_require__(33);
+const Repository_1 = __webpack_require__(37);
+const organization_mapper_1 = __webpack_require__(32);
 let OrganizationRepositoryTypeOrm = class OrganizationRepositoryTypeOrm extends users_repository_1.UserRepository {
     constructor(organizationRepository) {
         super();
@@ -1020,50 +1074,10 @@ exports.OrganizationRepositoryTypeOrm = OrganizationRepositoryTypeOrm = __decora
 
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ ((module) => {
 
 module.exports = require("typeorm/repository/Repository");
-
-/***/ }),
-/* 37 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.OrganizationMapper = void 0;
-const UniqueEntityID_1 = __webpack_require__(12);
-const Domain = __webpack_require__(9);
-class OrganizationMapper {
-    static async toDomain(raw) {
-        const password = await Domain.Password.create({
-            value: raw.password,
-            hashed: true,
-        });
-        const organization = Domain.Organization.create({
-            roles: raw.roles,
-            name: raw.name,
-            password: password.getValue(),
-            description: raw.description,
-            reputation: raw.reputation,
-            createdAt: raw.createdAt,
-        }, new UniqueEntityID_1.UniqueEntityID(raw.id));
-        return organization.getValue();
-    }
-    static toPersistence(org) {
-        return {
-            id: org.id,
-            roles: org.roles,
-            name: org.name,
-            password: org.password.value,
-            description: org.description,
-            reputation: org.reputation,
-            createdAt: org.createdAt,
-        };
-    }
-}
-exports.OrganizationMapper = OrganizationMapper;
-
 
 /***/ }),
 /* 38 */
@@ -1238,7 +1252,7 @@ let AuthController = class AuthController {
         }
         res.status(common_1.HttpStatus.OK);
         res.json(result.value);
-        res.send();
+        res.end();
     }
 };
 exports.AuthController = AuthController;
@@ -1303,6 +1317,8 @@ let AuthService = class AuthService {
         };
         return (0, Either_1.right)({
             access_token: await this.jwtService.signAsync(payload),
+            user_id: organization.id,
+            username: organization.name,
         });
     }
 };

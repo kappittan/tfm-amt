@@ -21,6 +21,7 @@ import { Exception } from '@app/common-lib/core/exceptions/Exception';
 import { Roles } from '@app/common-lib/auth/decorator/role.decorator';
 import { Role } from '@app/common-lib/auth/enum/role.enum';
 import { RolesGuard } from '@app/common-lib/auth/roles.guard';
+import { OrganizationMapper } from '../mapper/organization.mapper';
 
 @Controller('organizations')
 export class UsersController {
@@ -77,11 +78,14 @@ export class UsersController {
     }
   }
 
+  @Public()
   @Get()
-  async getAllOrganizations() {
+  async getAllOrganizations(@Res() res: Response) {
     const result = await this.usersService.getAllOrganizations();
 
-    return result;
+    res.status(HttpStatus.OK);
+    res.json({ data: result.map((org) => OrganizationMapper.toDto(org)) });
+    res.end();
   }
 
   @Get(':id')

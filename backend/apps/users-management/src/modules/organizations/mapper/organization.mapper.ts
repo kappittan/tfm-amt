@@ -1,6 +1,7 @@
 import { UniqueEntityID } from '@app/common-lib/core/domain/UniqueEntityID';
 import * as Domain from '../domain';
 import * as Persistence from '../infra/persistence';
+import { OrganizationDto } from '../dto/organization.dto';
 
 export class OrganizationMapper {
   static async toDomain(
@@ -34,6 +35,15 @@ export class OrganizationMapper {
       description: org.description,
       reputation: org.reputation,
       createdAt: org.createdAt,
+    };
+  }
+
+  static toDto(org: Domain.Organization): OrganizationDto {
+    return {
+      id: org.id,
+      name: org.name,
+      description: org.description,
+      reputation: org.reputation,
     };
   }
 }
