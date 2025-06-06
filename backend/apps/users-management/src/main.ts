@@ -17,6 +17,17 @@ async function bootstrap() {
 
   app.enableCors();
 
-  await app.listen(process.env.port ?? 3000);
+  // TCP microservice to recibe requests from the cti-management module
+  app.connectMicroservice({
+    transport: 'TCP',
+    options: {
+      host: 'localhost',
+      port: 3003,
+    },
+  });
+
+  await app.startAllMicroservices();
+
+  await app.listen(3001);
 }
 bootstrap();

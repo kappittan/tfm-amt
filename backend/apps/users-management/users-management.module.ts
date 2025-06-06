@@ -22,12 +22,6 @@ import { RolesGuard } from '@app/common-lib/auth/roles.guard';
     UsersModule,
     AuthModule,
   ],
-  providers: [
-    {
-      provide: APP_GUARD,
-      useClass: AuthGuard,
-    },
-    { provide: APP_GUARD, useClass: RolesGuard },
-  ],
+  exports: [UsersModule, AuthModule],
 })
 export class UsersManagementModule {}

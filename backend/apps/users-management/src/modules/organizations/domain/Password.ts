@@ -1,5 +1,6 @@
 import { ValueObject } from '@app/common-lib/core/domain/ValueObject';
 import { Result } from '@app/common-lib/core/logic/Result';
+import * as bcrypt from 'bcrypt';
 
 interface PasswordProps {
   value: string;
@@ -24,14 +25,9 @@ export class Password extends ValueObject<PasswordProps> {
   }
 
   public static async hashPassword(password): Promise<string> {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(password);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray
-      .map((byte) => byte.toString(16).padStart(2, '0'))
-      .join('');
-    return hashHex;
+    const saltRounds = 12;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    return hashedPassword;
   }
 
   public static isSecure(value: string): boolean {

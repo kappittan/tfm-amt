@@ -8,6 +8,7 @@ import { Password } from '../../organizations/domain';
 import { JwtService } from '@nestjs/jwt';
 import { Either, left, right } from '@app/common-lib/core/logic/Either';
 import * as AuthModuleException from '../exceptions';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -32,9 +33,9 @@ export class AuthService {
     }
 
     const organization = result.value.getValue();
-    const hashedPassword = await Password.hashPassword(pass);
+    //const hashedPassword = await Password.hashPassword(pass);
 
-    if (organization.password.value !== hashedPassword) {
+    if (!bcrypt.compareSync(pass, organization.password.value)) {
       return left(AuthModuleException.UnauthorizedUser.create());
     }
 

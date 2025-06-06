@@ -74,6 +74,34 @@ export class UsersService {
     return resolvedOrgs;
   }
 
+  async getReputationFromOrg(
+    orgId: string,
+  ): Promise<Either<Exceptions.OrganizationNotFound, Result<number>>> {
+    const org = await this.organizationRepository.findById(orgId);
+
+    if (org === null) {
+      return left(Exceptions.OrganizationNotFound.create(orgId));
+    }
+
+    return right(Result.ok(org.reputation));
+  }
+
+  async updateOrganizationReputation(
+    orgId: string,
+    newReputation: number,
+  ): Promise<Either<Exceptions.OrganizationNotFound, Result<void>>> {
+    const org = await this.organizationRepository.findById(orgId);
+
+    if (org === null) {
+      return left(Exceptions.OrganizationNotFound.create(orgId));
+    }
+
+    org.reputation = newReputation;
+    await this.organizationRepository.save(org);
+
+    return right(Result.ok());
+  }
+
   async getOrganizationById(
     id: string,
   ): Promise<

@@ -2,12 +2,11 @@ import { Alert, Col, Container, Row } from "react-bootstrap";
 import { NavBar } from "../components/NavBar";
 import logo from "../assets/ctishield.svg";
 import { LoginForm } from "../components/LoginForm";
-import { OrganizationPreview } from "../components/OrganizationPreview";
+import { Footer } from "../components/Footer";
 
 export function HomePage() {
   return (
     <>
-      <NavBar />
       <Container fluid>
         <Row>
           <Alert show={false} variant="danger" dismissible>
@@ -15,19 +14,19 @@ export function HomePage() {
             <p>Test</p>
           </Alert>
         </Row>
-        <Row style={{ marginTop: 20 }}>
+        <Row className="my-5 mx-3">
           <Col></Col>
           <Col sm={8} md={8}>
             <h1 className="text-light" style={{ textAlign: "center" }}>
-              Welcome to the CTIshield.
+              Welcome to CTIshield.
             </h1>
-            <h5 className="text-light" style={{ textAlign: "center" }}>
+            <h6 className="text-light" style={{ textAlign: "center" }}>
               A platform for sharing threat intelligence.
-            </h5>
+            </h6>
           </Col>
           <Col></Col>
         </Row>
-        <Row style={{ marginTop: 100 }}>
+        <Row className="py-5 mx-3 px-3">
           <Col sm={12} md={4}>
             <img
               src={logo}
@@ -36,12 +35,11 @@ export function HomePage() {
             />
           </Col>
           <Col sm={8} md={8}>
-            <Row>
-              <h2 className="text-light" style={{ textAlign: "center" }}>
+            <Row className="mt-5 mb-3">
+              <h3 className="text-light text-center">
                 Please login or register to continue.
-              </h2>
+              </h3>
             </Row>
-            <Row style={{ marginTop: 20, marginBottom: 20 }}></Row>
             <Row>
               <LoginForm />
             </Row>

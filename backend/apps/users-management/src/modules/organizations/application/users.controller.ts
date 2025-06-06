@@ -22,6 +22,8 @@ import { Roles } from '@app/common-lib/auth/decorator/role.decorator';
 import { Role } from '@app/common-lib/auth/enum/role.enum';
 import { RolesGuard } from '@app/common-lib/auth/roles.guard';
 import { OrganizationMapper } from '../mapper/organization.mapper';
+import { GetUserId } from '@app/common-lib/auth/decorator/get-user-id.decorator';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 
 @Controller('organizations')
 export class UsersController {
@@ -76,6 +78,34 @@ export class UsersController {
       res.location(location);
       res.send();
     }
+  }
+
+  @MessagePattern({ cmd: 'get_reputation' })
+  async getOrganizationReputation(data: string): Promise<number> {
+    const result = await this.usersService.getReputationFromOrg(data);
+
+    if (result.isLeft()) {
+      return -1;
+    }
+
+    return result.value.getValue();
+  }
+
+  @MessagePattern({ cmd: 'update_reputation' })
+  async updateOrganizationReputation(data: {
+    orgId: string;
+    newReputation: number;
+  }): Promise<string> {
+    const result = await this.usersService.updateOrganizationReputation(
+      data.orgId,
+      data.newReputation,
+    );
+
+    if (result.isLeft()) {
+      return 'ERROR';
+    }
+
+    return 'OK';
   }
 
   @Public()

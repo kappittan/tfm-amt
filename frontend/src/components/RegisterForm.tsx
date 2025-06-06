@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import Alert from "react-bootstrap/Alert";
+import { Col, Container, ListGroup, Row } from "react-bootstrap";
 
 export function RegisterForm() {
   const [datos, setDatos] = useState({
@@ -48,64 +48,60 @@ export function RegisterForm() {
 
   return (
     <div>
-      <Alert
-        show={showSuccessAlert}
-        variant="success"
-        dismissible
-        onClose={() => {
-          setShowSuccessAlert(false);
-        }}
-      >
-        <Alert.Heading>Organization created!</Alert.Heading>
-        <p>
-          Your organization has been created. You can now login with your
-          credentials.
-        </p>
-      </Alert>
-      <Alert
-        show={showErrorAlert}
-        variant="danger"
-        dismissible
-        onClose={() => {
-          setShowErrorAlert(false);
-        }}
-      >
-        <Alert.Heading>{errorHeader}</Alert.Heading>
-        <p>{errorMessage}</p>
-      </Alert>
-      <h1>New organization</h1>
-      <Form>
-        <Form.Group className="mb-3" controlId="formName">
-          <Form.Label>Organization name</Form.Label>
-          <Form.Control
-            type="text"
-            value={datos.name}
-            onChange={handleChangeName}
-          />
-        </Form.Group>
+      <Row>
+        <ListGroup style={{ backgroundColor: "#D1A3FF" }}>
+          <Form>
+            <Row className="my-3 mx-3">
+              <Form.Group className="mb-3" controlId="formName">
+                <Form.Label>Organization name</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={datos.name}
+                  onChange={handleChangeName}
+                />
+              </Form.Group>
+            </Row>
 
-        <Form.Group className="mb-3" controlId="formDescription">
-          <Form.Label>Organization description</Form.Label>
-          <Form.Control
-            type="text"
-            value={datos.description}
-            onChange={handleChangeDescription}
-          />
-        </Form.Group>
+            <Row className="my-3 mx-3">
+              <Form.Group className="mb-3" controlId="formDescription">
+                <Form.Label>Organization description</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={datos.description}
+                  onChange={handleChangeDescription}
+                />
+              </Form.Group>
+            </Row>
 
-        <Form.Group className="mb-3" controlId="formPassword">
-          <Form.Label>Password</Form.Label>
-          <Form.Control
-            type="password"
-            value={datos.password}
-            onChange={handleChangePassword}
-          />
-        </Form.Group>
+            <Row className="my-3 mx-3">
+              <Form.Group className="mb-3" controlId="formPassword">
+                <Form.Label>Password</Form.Label>
+                <Form.Control
+                  type="password"
+                  value={datos.password}
+                  onChange={handleChangePassword}
+                />
+              </Form.Group>
+            </Row>
 
-        <Button variant="primary" type="submit" onClick={handleSubmit}>
-          Create organization
-        </Button>
-      </Form>
+            <Row className="my-4 mx-3">
+              <Col></Col>
+              <Col sm={4} md={4} lg={4}>
+                <Row>
+                  <Button
+                    variant="primary"
+                    type="submit"
+                    onClick={handleSubmit}
+                  >
+                    Create organization
+                  </Button>
+                </Row>
+              </Col>
+              <Col></Col>
+            </Row>
+          </Form>
+        </ListGroup>
+      </Row>
     </div>
   );
 }

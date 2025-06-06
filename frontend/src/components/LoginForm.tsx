@@ -53,58 +53,50 @@ export function LoginForm() {
 
   return (
     <div>
-      <Container fluid>
-        <ListGroup style={{ backgroundColor: "#D1A3FF" }}>
-          <Form>
-            <Container fluid>
-              <Row className="my-2">
-                <Form.Group controlId="formName">
-                  <Form.Label>Organization name</Form.Label>
-                  <Form.Control
-                    type="email"
-                    placeholder="Enter email"
-                    value={username}
-                    onChange={handleChangeUsername}
-                  />
-                </Form.Group>
+      <ListGroup style={{ backgroundColor: "#D1A3FF" }}>
+        <Form>
+          <Row className="my-3 mx-3">
+            <Form.Group controlId="formLoginName">
+              <Form.Label>Organization name</Form.Label>
+              <Form.Control
+                type="email"
+                placeholder="Enter email"
+                value={username}
+                onChange={handleChangeUsername}
+              />
+            </Form.Group>
+          </Row>
+
+          <Row className="my-3 mx-3">
+            <Form.Group controlId="formLoginPassword">
+              <Form.Label>Password</Form.Label>
+              <Form.Control
+                type="password"
+                placeholder="Enter password"
+                value={password}
+                onChange={handleChangePassword}
+              />
+            </Form.Group>
+          </Row>
+
+          <Row className="my-4">
+            <Col></Col>
+            <Col>
+              <Row>
+                <Button variant="primary" type="submit" onClick={handleSubmit}>
+                  Log in
+                </Button>
               </Row>
-            </Container>
-            <Container fluid>
-              <Row className="my-2">
-                <Form.Group controlId="formPassword">
-                  <Form.Label>Password</Form.Label>
-                  <Form.Control
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={handleChangePassword}
-                  />
-                </Form.Group>
-              </Row>
-            </Container>
-            <Row className="my-4">
-              <Col></Col>
-              <Col>
-                <Row>
-                  <Button
-                    variant="primary"
-                    type="submit"
-                    onClick={handleSubmit}
-                  >
-                    Log in
-                  </Button>
-                </Row>
-              </Col>
-              <Col></Col>
-            </Row>
-            <Row className="my-2 text-center">
-              <Form.Text className="text-muted">
-                Don't have an account? <Link to="/register">Register</Link>
-              </Form.Text>
-            </Row>
-          </Form>
-        </ListGroup>
-      </Container>
+            </Col>
+            <Col></Col>
+          </Row>
+          <Row className="my-2 text-center">
+            <Form.Text className="text-muted">
+              Don't have an account? <Link to="/register">Register</Link>
+            </Form.Text>
+          </Row>
+        </Form>
+      </ListGroup>
     </div>
   );
 }

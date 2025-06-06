@@ -23,10 +23,7 @@ exports.UsersManagementModule = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(4);
 const users_module_1 = __webpack_require__(5);
-const core_1 = __webpack_require__(1);
-const auth_guard_1 = __webpack_require__(38);
-const auth_module_1 = __webpack_require__(41);
-const roles_guard_1 = __webpack_require__(48);
+const auth_module_1 = __webpack_require__(40);
 let UsersManagementModule = class UsersManagementModule {
 };
 exports.UsersManagementModule = UsersManagementModule;
@@ -47,13 +44,7 @@ exports.UsersManagementModule = UsersManagementModule = __decorate([
             users_module_1.UsersModule,
             auth_module_1.AuthModule,
         ],
-        providers: [
-            {
-                provide: core_1.APP_GUARD,
-                useClass: auth_guard_1.AuthGuard,
-            },
-            { provide: core_1.APP_GUARD, useClass: roles_guard_1.RolesGuard },
-        ],
+        exports: [users_module_1.UsersModule, auth_module_1.AuthModule],
     })
 ], UsersManagementModule);
 
@@ -87,9 +78,9 @@ const common_1 = __webpack_require__(3);
 const users_controller_1 = __webpack_require__(6);
 const users_service_1 = __webpack_require__(8);
 const typeorm_1 = __webpack_require__(4);
-const Persistence = __webpack_require__(33);
-const users_repository_1 = __webpack_require__(19);
-const users_repository_typeorm_1 = __webpack_require__(36);
+const Persistence = __webpack_require__(35);
+const users_repository_1 = __webpack_require__(20);
+const users_repository_typeorm_1 = __webpack_require__(38);
 let UsersModule = class UsersModule {
 };
 exports.UsersModule = UsersModule;
@@ -127,16 +118,17 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var UsersController_1;
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UsersController = void 0;
 const common_1 = __webpack_require__(3);
 const express_1 = __webpack_require__(7);
 const users_service_1 = __webpack_require__(8);
-const create_organization_dto_1 = __webpack_require__(29);
-const UserModuleException = __webpack_require__(22);
-const public_decorator_1 = __webpack_require__(31);
-const organization_mapper_1 = __webpack_require__(32);
+const create_organization_dto_1 = __webpack_require__(30);
+const UserModuleException = __webpack_require__(23);
+const public_decorator_1 = __webpack_require__(32);
+const organization_mapper_1 = __webpack_require__(33);
+const microservices_1 = __webpack_require__(34);
 let UsersController = UsersController_1 = class UsersController {
     constructor(usersService) {
         this.usersService = usersService;
@@ -182,6 +174,10 @@ let UsersController = UsersController_1 = class UsersController {
             res.send();
         }
     }
+    async get_reputation(data) {
+        console.log('MessagePattern');
+        return await this.usersService.getReputationFromOrg(data);
+    }
     async getAllOrganizations(res) {
         const result = await this.usersService.getAllOrganizations();
         res.status(common_1.HttpStatus.OK);
@@ -222,11 +218,17 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "createOrganization", null);
 __decorate([
+    (0, microservices_1.MessagePattern)({ cmd: 'get_reputation' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+], UsersController.prototype, "get_reputation", null);
+__decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Get)(),
     __param(0, (0, common_1.Res)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_d = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _d : Object]),
+    __metadata("design:paramtypes", [typeof (_e = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _e : Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getAllOrganizations", null);
 __decorate([
@@ -234,7 +236,7 @@ __decorate([
     __param(0, (0, common_1.Res)()),
     __param(1, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _e : Object, String]),
+    __metadata("design:paramtypes", [typeof (_f = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _f : Object, String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getOrganizationById", null);
 __decorate([
@@ -242,7 +244,7 @@ __decorate([
     __param(0, (0, common_1.Res)()),
     __param(1, (0, common_1.Param)('name')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_f = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _f : Object, String]),
+    __metadata("design:paramtypes", [typeof (_g = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _g : Object, String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getOrganizationByName", null);
 exports.UsersController = UsersController = UsersController_1 = __decorate([
@@ -277,10 +279,10 @@ exports.UsersService = void 0;
 const common_1 = __webpack_require__(3);
 const Domain = __webpack_require__(9);
 const Result_1 = __webpack_require__(15);
-const users_repository_1 = __webpack_require__(19);
-const Either_1 = __webpack_require__(21);
-const Exceptions = __webpack_require__(22);
-const role_enum_1 = __webpack_require__(28);
+const users_repository_1 = __webpack_require__(20);
+const Either_1 = __webpack_require__(22);
+const Exceptions = __webpack_require__(23);
+const role_enum_1 = __webpack_require__(29);
 let UsersService = class UsersService {
     constructor(organizationRepository) {
         this.organizationRepository = organizationRepository;
@@ -316,6 +318,21 @@ let UsersService = class UsersService {
         const orgs = await this.organizationRepository.findAll();
         const resolvedOrgs = await Promise.all(orgs);
         return resolvedOrgs;
+    }
+    async getReputationFromOrg(orgId) {
+        console.log('Service');
+        const org = await this.organizationRepository.findById(orgId);
+        console.log(org.reputation);
+        return org.reputation;
+    }
+    async updateOrganizationReputation(orgId, reputation) {
+        const org = await this.organizationRepository.findById(orgId);
+        if (org === null) {
+            return (0, Either_1.left)(Exceptions.OrganizationNotFound.create(orgId));
+        }
+        org.reputation = reputation;
+        await this.organizationRepository.save(org);
+        return (0, Either_1.right)(Result_1.Result.ok());
     }
     async getOrganizationById(id) {
         const org = await this.organizationRepository.findById(id);
@@ -555,6 +572,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Password = void 0;
 const ValueObject_1 = __webpack_require__(17);
 const Result_1 = __webpack_require__(15);
+const bcrypt = __webpack_require__(19);
 class Password extends ValueObject_1.ValueObject {
     constructor(props) {
         super(props);
@@ -569,14 +587,9 @@ class Password extends ValueObject_1.ValueObject {
         return this.props.hashed;
     }
     static async hashPassword(password) {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(password);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashHex = hashArray
-            .map((byte) => byte.toString(16).padStart(2, '0'))
-            .join('');
-        return hashHex;
+        const saltRounds = 12;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        return hashedPassword;
     }
     static isSecure(value) {
         const regex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -635,19 +648,25 @@ module.exports = require("shallow-equal-object");
 
 /***/ }),
 /* 19 */
+/***/ ((module) => {
+
+module.exports = require("bcrypt");
+
+/***/ }),
+/* 20 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserRepository = void 0;
-const repository_1 = __webpack_require__(20);
+const repository_1 = __webpack_require__(21);
 class UserRepository extends repository_1.Repository {
 }
 exports.UserRepository = UserRepository;
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -659,7 +678,7 @@ exports.Repository = Repository;
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -700,30 +719,30 @@ exports.right = right;
 
 
 /***/ }),
-/* 22 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.OrganizationNotCreated = exports.OrganizationNotFound = exports.OrganizationNameIsTaken = exports.PasswordIsNotValid = void 0;
-const PasswordIsNotValid_1 = __webpack_require__(23);
-Object.defineProperty(exports, "PasswordIsNotValid", ({ enumerable: true, get: function () { return PasswordIsNotValid_1.PasswordIsNotValid; } }));
-const OrganizationNameIsTaken_1 = __webpack_require__(25);
-Object.defineProperty(exports, "OrganizationNameIsTaken", ({ enumerable: true, get: function () { return OrganizationNameIsTaken_1.OrganizationNameIsTaken; } }));
-const OrganizationNotFound_1 = __webpack_require__(26);
-Object.defineProperty(exports, "OrganizationNotFound", ({ enumerable: true, get: function () { return OrganizationNotFound_1.OrganizationNotFound; } }));
-const OrganizationNotCreated_1 = __webpack_require__(27);
-Object.defineProperty(exports, "OrganizationNotCreated", ({ enumerable: true, get: function () { return OrganizationNotCreated_1.OrganizationNotCreated; } }));
-
-
-/***/ }),
 /* 23 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.OrganizationNotCreated = exports.OrganizationNotFound = exports.OrganizationNameIsTaken = exports.PasswordIsNotValid = void 0;
+const PasswordIsNotValid_1 = __webpack_require__(24);
+Object.defineProperty(exports, "PasswordIsNotValid", ({ enumerable: true, get: function () { return PasswordIsNotValid_1.PasswordIsNotValid; } }));
+const OrganizationNameIsTaken_1 = __webpack_require__(26);
+Object.defineProperty(exports, "OrganizationNameIsTaken", ({ enumerable: true, get: function () { return OrganizationNameIsTaken_1.OrganizationNameIsTaken; } }));
+const OrganizationNotFound_1 = __webpack_require__(27);
+Object.defineProperty(exports, "OrganizationNotFound", ({ enumerable: true, get: function () { return OrganizationNotFound_1.OrganizationNotFound; } }));
+const OrganizationNotCreated_1 = __webpack_require__(28);
+Object.defineProperty(exports, "OrganizationNotCreated", ({ enumerable: true, get: function () { return OrganizationNotCreated_1.OrganizationNotCreated; } }));
+
+
+/***/ }),
+/* 24 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PasswordIsNotValid = void 0;
-const Exception_1 = __webpack_require__(24);
+const Exception_1 = __webpack_require__(25);
 class PasswordIsNotValid extends Exception_1.Exception {
     constructor(message) {
         super(message);
@@ -736,7 +755,7 @@ exports.PasswordIsNotValid = PasswordIsNotValid;
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -754,13 +773,13 @@ exports.Exception = Exception;
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.OrganizationNameIsTaken = void 0;
-const Exception_1 = __webpack_require__(24);
+const Exception_1 = __webpack_require__(25);
 class OrganizationNameIsTaken extends Exception_1.Exception {
     constructor(name) {
         super(`The name "${name}" for the new organization is already taken`);
@@ -773,13 +792,13 @@ exports.OrganizationNameIsTaken = OrganizationNameIsTaken;
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.OrganizationNotFound = void 0;
-const Exception_1 = __webpack_require__(24);
+const Exception_1 = __webpack_require__(25);
 class OrganizationNotFound extends Exception_1.Exception {
     constructor(id) {
         super(`The organization with id "${id}" does not exist`);
@@ -792,13 +811,13 @@ exports.OrganizationNotFound = OrganizationNotFound;
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.OrganizationNotCreated = void 0;
-const Exception_1 = __webpack_require__(24);
+const Exception_1 = __webpack_require__(25);
 class OrganizationNotCreated extends Exception_1.Exception {
     constructor(message) {
         super(message);
@@ -811,7 +830,7 @@ exports.OrganizationNotCreated = OrganizationNotCreated;
 
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -825,7 +844,7 @@ var Role;
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -840,7 +859,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CreateOrganizationDto = void 0;
-const class_validator_1 = __webpack_require__(30);
+const class_validator_1 = __webpack_require__(31);
 class CreateOrganizationDto {
 }
 exports.CreateOrganizationDto = CreateOrganizationDto;
@@ -862,13 +881,13 @@ __decorate([
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ ((module) => {
 
 module.exports = require("class-validator");
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -881,7 +900,7 @@ exports.Public = Public;
 
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -929,18 +948,24 @@ exports.OrganizationMapper = OrganizationMapper;
 
 
 /***/ }),
-/* 33 */
+/* 34 */
+/***/ ((module) => {
+
+module.exports = require("@nestjs/microservices");
+
+/***/ }),
+/* 35 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Organization = void 0;
-const Organization_1 = __webpack_require__(34);
+const Organization_1 = __webpack_require__(36);
 Object.defineProperty(exports, "Organization", ({ enumerable: true, get: function () { return Organization_1.Organization; } }));
 
 
 /***/ }),
-/* 34 */
+/* 36 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -956,8 +981,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Organization = void 0;
-const role_enum_1 = __webpack_require__(28);
-const typeorm_1 = __webpack_require__(35);
+const role_enum_1 = __webpack_require__(29);
+const typeorm_1 = __webpack_require__(37);
 let Organization = class Organization {
 };
 exports.Organization = Organization;
@@ -998,13 +1023,13 @@ exports.Organization = Organization = __decorate([
 
 
 /***/ }),
-/* 35 */
+/* 37 */
 /***/ ((module) => {
 
 module.exports = require("typeorm");
 
 /***/ }),
-/* 36 */
+/* 38 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -1024,11 +1049,11 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.OrganizationRepositoryTypeOrm = void 0;
 const common_1 = __webpack_require__(3);
-const users_repository_1 = __webpack_require__(19);
+const users_repository_1 = __webpack_require__(20);
 const typeorm_1 = __webpack_require__(4);
-const Persistence = __webpack_require__(33);
-const Repository_1 = __webpack_require__(37);
-const organization_mapper_1 = __webpack_require__(32);
+const Persistence = __webpack_require__(35);
+const Repository_1 = __webpack_require__(39);
+const organization_mapper_1 = __webpack_require__(33);
 let OrganizationRepositoryTypeOrm = class OrganizationRepositoryTypeOrm extends users_repository_1.UserRepository {
     constructor(organizationRepository) {
         super();
@@ -1074,94 +1099,13 @@ exports.OrganizationRepositoryTypeOrm = OrganizationRepositoryTypeOrm = __decora
 
 
 /***/ }),
-/* 37 */
+/* 39 */
 /***/ ((module) => {
 
 module.exports = require("typeorm/repository/Repository");
 
 /***/ }),
-/* 38 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a, _b;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.AuthGuard = void 0;
-const common_1 = __webpack_require__(3);
-const jwt_1 = __webpack_require__(39);
-const constants_1 = __webpack_require__(40);
-const core_1 = __webpack_require__(1);
-const public_decorator_1 = __webpack_require__(31);
-let AuthGuard = class AuthGuard {
-    constructor(jwtService, reflector) {
-        this.jwtService = jwtService;
-        this.reflector = reflector;
-    }
-    async canActivate(context) {
-        const isPublic = this.reflector.getAllAndOverride(public_decorator_1.IS_PUBLIC_KEY, [
-            context.getHandler(),
-            context.getClass(),
-        ]);
-        if (isPublic) {
-            return true;
-        }
-        const request = context.switchToHttp().getRequest();
-        const token = this.extractTokenFromHeader(request);
-        if (!token) {
-            throw new common_1.UnauthorizedException();
-        }
-        try {
-            const payload = await this.jwtService.verifyAsync(token, {
-                secret: constants_1.jwtConstants.secret,
-            });
-            request['user'] = payload;
-        }
-        catch {
-            throw new common_1.UnauthorizedException();
-        }
-        return true;
-    }
-    extractTokenFromHeader(request) {
-        const [type, token] = request.headers.authorization?.split(' ') ?? [];
-        return type === 'Bearer' ? token : undefined;
-    }
-};
-exports.AuthGuard = AuthGuard;
-exports.AuthGuard = AuthGuard = __decorate([
-    (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _a : Object, typeof (_b = typeof core_1.Reflector !== "undefined" && core_1.Reflector) === "function" ? _b : Object])
-], AuthGuard);
-
-
-/***/ }),
-/* 39 */
-/***/ ((module) => {
-
-module.exports = require("@nestjs/jwt");
-
-/***/ }),
 /* 40 */
-/***/ ((__unused_webpack_module, exports) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.jwtConstants = void 0;
-exports.jwtConstants = {
-    secret: 'DO NOT USE THIS VALUE. INSTEAD, CREATE A COMPLEX SECRET AND KEEP IT SAFE OUTSIDE OF THE SOURCE CODE.',
-};
-
-
-/***/ }),
-/* 41 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -1174,11 +1118,13 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthModule = void 0;
 const common_1 = __webpack_require__(3);
-const auth_controller_1 = __webpack_require__(42);
-const auth_service_1 = __webpack_require__(43);
+const auth_controller_1 = __webpack_require__(41);
+const auth_service_1 = __webpack_require__(42);
 const users_module_1 = __webpack_require__(5);
-const jwt_1 = __webpack_require__(39);
-const constants_1 = __webpack_require__(40);
+const jwt_1 = __webpack_require__(43);
+const constants_1 = __webpack_require__(48);
+const core_1 = __webpack_require__(1);
+const auth_guard_1 = __webpack_require__(49);
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -1189,18 +1135,24 @@ exports.AuthModule = AuthModule = __decorate([
             jwt_1.JwtModule.register({
                 global: true,
                 secret: constants_1.jwtConstants.secret,
-                signOptions: { expiresIn: '60s' },
+                signOptions: { expiresIn: '3600s' },
             }),
         ],
         controllers: [auth_controller_1.AuthController],
-        providers: [auth_service_1.AuthService],
+        providers: [
+            auth_service_1.AuthService,
+            {
+                provide: core_1.APP_GUARD,
+                useClass: auth_guard_1.AuthGuard,
+            },
+        ],
         exports: [auth_service_1.AuthService],
     })
 ], AuthModule);
 
 
 /***/ }),
-/* 42 */
+/* 41 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -1220,9 +1172,9 @@ var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthController = void 0;
 const common_1 = __webpack_require__(3);
-const auth_service_1 = __webpack_require__(43);
+const auth_service_1 = __webpack_require__(42);
 const sign_in_dto_1 = __webpack_require__(47);
-const public_decorator_1 = __webpack_require__(31);
+const public_decorator_1 = __webpack_require__(32);
 const express_1 = __webpack_require__(7);
 const AuthModuleException = __webpack_require__(44);
 let AuthController = class AuthController {
@@ -1273,7 +1225,7 @@ exports.AuthController = AuthController = __decorate([
 
 
 /***/ }),
-/* 43 */
+/* 42 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -1291,10 +1243,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthService = void 0;
 const common_1 = __webpack_require__(3);
 const users_service_1 = __webpack_require__(8);
-const domain_1 = __webpack_require__(9);
-const jwt_1 = __webpack_require__(39);
-const Either_1 = __webpack_require__(21);
+const jwt_1 = __webpack_require__(43);
+const Either_1 = __webpack_require__(22);
 const AuthModuleException = __webpack_require__(44);
+const bcrypt = __webpack_require__(19);
 let AuthService = class AuthService {
     constructor(usersService, jwtService) {
         this.usersService = usersService;
@@ -1306,8 +1258,7 @@ let AuthService = class AuthService {
             return (0, Either_1.left)(AuthModuleException.UserNotFound.create(username));
         }
         const organization = result.value.getValue();
-        const hashedPassword = await domain_1.Password.hashPassword(pass);
-        if (organization.password.value !== hashedPassword) {
+        if (!bcrypt.compareSync(pass, organization.password.value)) {
             return (0, Either_1.left)(AuthModuleException.UnauthorizedUser.create());
         }
         const payload = {
@@ -1330,6 +1281,12 @@ exports.AuthService = AuthService = __decorate([
 
 
 /***/ }),
+/* 43 */
+/***/ ((module) => {
+
+module.exports = require("@nestjs/jwt");
+
+/***/ }),
 /* 44 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
@@ -1349,7 +1306,7 @@ Object.defineProperty(exports, "UserNotFound", ({ enumerable: true, get: functio
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UnauthorizedUser = void 0;
-const Exception_1 = __webpack_require__(24);
+const Exception_1 = __webpack_require__(25);
 class UnauthorizedUser extends Exception_1.Exception {
     constructor() {
         super('Authentication is required');
@@ -1368,7 +1325,7 @@ exports.UnauthorizedUser = UnauthorizedUser;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserNotFound = void 0;
-const Exception_1 = __webpack_require__(24);
+const Exception_1 = __webpack_require__(25);
 class UserNotFound extends Exception_1.Exception {
     constructor(userName) {
         super(`User with username "${userName}" not found`);
@@ -1396,7 +1353,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SignInDto = void 0;
-const class_validator_1 = __webpack_require__(30);
+const class_validator_1 = __webpack_require__(31);
 class SignInDto {
 }
 exports.SignInDto = SignInDto;
@@ -1414,6 +1371,18 @@ __decorate([
 
 /***/ }),
 /* 48 */
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.jwtConstants = void 0;
+exports.jwtConstants = {
+    secret: 'DO NOT USE THIS VALUE. INSTEAD, CREATE A COMPLEX SECRET AND KEEP IT SAFE OUTSIDE OF THE SOURCE CODE.',
+};
+
+
+/***/ }),
+/* 49 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -1426,50 +1395,53 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.RolesGuard = void 0;
+exports.AuthGuard = void 0;
 const common_1 = __webpack_require__(3);
+const jwt_1 = __webpack_require__(43);
+const constants_1 = __webpack_require__(48);
 const core_1 = __webpack_require__(1);
-const role_decorator_1 = __webpack_require__(49);
-let RolesGuard = class RolesGuard {
-    constructor(reflector) {
+const public_decorator_1 = __webpack_require__(32);
+let AuthGuard = class AuthGuard {
+    constructor(jwtService, reflector) {
+        this.jwtService = jwtService;
         this.reflector = reflector;
     }
-    canActivate(context) {
-        console.log('Ha entrado :)');
-        const requiredRoles = this.reflector.getAllAndOverride(role_decorator_1.ROLES_KEY, [
+    async canActivate(context) {
+        const isPublic = this.reflector.getAllAndOverride(public_decorator_1.IS_PUBLIC_KEY, [
             context.getHandler(),
             context.getClass(),
         ]);
-        if (!requiredRoles) {
+        if (isPublic) {
             return true;
         }
-        const { user } = context.switchToHttp().getRequest();
-        if (requiredRoles.some((role) => user.roles?.includes(role))) {
-            return true;
+        const request = context.switchToHttp().getRequest();
+        const token = this.extractTokenFromHeader(request);
+        if (!token) {
+            throw new common_1.UnauthorizedException();
         }
-        throw new common_1.ForbiddenException('You do not have permission required to access this resource');
+        try {
+            const payload = await this.jwtService.verifyAsync(token, {
+                secret: constants_1.jwtConstants.secret,
+            });
+            request['user'] = payload;
+        }
+        catch {
+            throw new common_1.UnauthorizedException();
+        }
+        return true;
+    }
+    extractTokenFromHeader(request) {
+        const [type, token] = request.headers.authorization?.split(' ') ?? [];
+        return type === 'Bearer' ? token : undefined;
     }
 };
-exports.RolesGuard = RolesGuard;
-exports.RolesGuard = RolesGuard = __decorate([
+exports.AuthGuard = AuthGuard;
+exports.AuthGuard = AuthGuard = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof core_1.Reflector !== "undefined" && core_1.Reflector) === "function" ? _a : Object])
-], RolesGuard);
-
-
-/***/ }),
-/* 49 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Roles = exports.ROLES_KEY = void 0;
-const common_1 = __webpack_require__(3);
-exports.ROLES_KEY = 'roles';
-const Roles = (...roles) => (0, common_1.SetMetadata)(exports.ROLES_KEY, roles);
-exports.Roles = Roles;
+    __metadata("design:paramtypes", [typeof (_a = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _a : Object, typeof (_b = typeof core_1.Reflector !== "undefined" && core_1.Reflector) === "function" ? _b : Object])
+], AuthGuard);
 
 
 /***/ })
@@ -1518,7 +1490,15 @@ async function bootstrap() {
         disableErrorMessages: false,
     }));
     app.enableCors();
-    await app.listen(process.env.port ?? 3000);
+    app.connectMicroservice({
+        transport: 'TCP',
+        options: {
+            host: 'localhost',
+            port: 3003,
+        },
+    });
+    await app.startAllMicroservices();
+    await app.listen(3001);
 }
 bootstrap();
 

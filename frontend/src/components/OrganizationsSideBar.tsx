@@ -3,6 +3,7 @@ import { OrganizationPreview } from "./OrganizationPreview";
 import { useEffect, useState } from "react";
 
 interface OrganizationValues {
+  id: string;
   name: string;
   description: string;
   reputation: number;
