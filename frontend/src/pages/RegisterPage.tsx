@@ -1,10 +1,27 @@
 import { Alert, Col, Container, Row } from "react-bootstrap";
 import { RegisterForm } from "../components/RegisterForm";
+import { useState } from "react";
 
 export function RegisterPage() {
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertVariant, setAlertVariant] = useState("success");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertHeader, setAlertHeader] = useState("");
+
   return (
     <>
       <Container fluid>
+        <Row>
+          <Alert
+            show={showAlert}
+            variant={alertVariant}
+            onClose={() => setShowAlert(false)}
+            dismissible
+          >
+            <Alert.Heading>{alertHeader}</Alert.Heading>
+            <p>{alertMessage}</p>
+          </Alert>
+        </Row>
         <Row>
           <Alert show={false}></Alert>
         </Row>
@@ -20,7 +37,12 @@ export function RegisterPage() {
         <Row className="my-4 mx-3">
           <Col></Col>
           <Col sm={8} md={8} lg={8}>
-            <RegisterForm />
+            <RegisterForm
+              setAlertHeader={setAlertHeader}
+              setAlertMessage={setAlertMessage}
+              setAlertVariant={setAlertVariant}
+              setShowAlert={setShowAlert}
+            />
           </Col>
           <Col></Col>
         </Row>

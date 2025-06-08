@@ -118,7 +118,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var UsersController_1;
-var _a, _b, _c, _d, _e, _f, _g;
+var _a, _b, _c, _d, _e, _f, _g, _h;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UsersController = void 0;
 const common_1 = __webpack_require__(3);
@@ -136,7 +136,7 @@ let UsersController = UsersController_1 = class UsersController {
     static processException(exception, res) {
         switch (exception.constructor) {
             case UserModuleException.PasswordIsNotValid:
-                res.status(common_1.HttpStatus.CONFLICT);
+                res.status(common_1.HttpStatus.UNPROCESSABLE_ENTITY);
                 res.json({ errors: { message: exception.errorValue().message } });
                 res.send();
                 return;
@@ -174,9 +174,19 @@ let UsersController = UsersController_1 = class UsersController {
             res.send();
         }
     }
-    async get_reputation(data) {
-        console.log('MessagePattern');
-        return await this.usersService.getReputationFromOrg(data);
+    async getOrganizationReputation(data) {
+        const result = await this.usersService.getReputationFromOrg(data);
+        if (result.isLeft()) {
+            return -1;
+        }
+        return result.value.getValue();
+    }
+    async updateOrganizationReputation(data) {
+        const result = await this.usersService.updateOrganizationReputation(data.orgId, data.newReputation);
+        if (result.isLeft()) {
+            return 'ERROR';
+        }
+        return 'OK';
     }
     async getAllOrganizations(res) {
         const result = await this.usersService.getAllOrganizations();
@@ -222,13 +232,19 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
-], UsersController.prototype, "get_reputation", null);
+], UsersController.prototype, "getOrganizationReputation", null);
+__decorate([
+    (0, microservices_1.MessagePattern)({ cmd: 'update_reputation' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+], UsersController.prototype, "updateOrganizationReputation", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Get)(),
     __param(0, (0, common_1.Res)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _e : Object]),
+    __metadata("design:paramtypes", [typeof (_f = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _f : Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getAllOrganizations", null);
 __decorate([
@@ -236,7 +252,7 @@ __decorate([
     __param(0, (0, common_1.Res)()),
     __param(1, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_f = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _f : Object, String]),
+    __metadata("design:paramtypes", [typeof (_g = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _g : Object, String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getOrganizationById", null);
 __decorate([
@@ -244,7 +260,7 @@ __decorate([
     __param(0, (0, common_1.Res)()),
     __param(1, (0, common_1.Param)('name')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_g = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _g : Object, String]),
+    __metadata("design:paramtypes", [typeof (_h = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _h : Object, String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getOrganizationByName", null);
 exports.UsersController = UsersController = UsersController_1 = __decorate([
@@ -320,17 +336,18 @@ let UsersService = class UsersService {
         return resolvedOrgs;
     }
     async getReputationFromOrg(orgId) {
-        console.log('Service');
-        const org = await this.organizationRepository.findById(orgId);
-        console.log(org.reputation);
-        return org.reputation;
-    }
-    async updateOrganizationReputation(orgId, reputation) {
         const org = await this.organizationRepository.findById(orgId);
         if (org === null) {
             return (0, Either_1.left)(Exceptions.OrganizationNotFound.create(orgId));
         }
-        org.reputation = reputation;
+        return (0, Either_1.right)(Result_1.Result.ok(org.reputation));
+    }
+    async updateOrganizationReputation(orgId, newReputation) {
+        const org = await this.organizationRepository.findById(orgId);
+        if (org === null) {
+            return (0, Either_1.left)(Exceptions.OrganizationNotFound.create(orgId));
+        }
+        org.reputation = newReputation;
         await this.organizationRepository.save(org);
         return (0, Either_1.right)(Result_1.Result.ok());
     }

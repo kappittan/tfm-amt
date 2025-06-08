@@ -32,7 +32,7 @@ export class UsersController {
   private static processException(exception: Exception, res: Response): void {
     switch (exception.constructor) {
       case UserModuleException.PasswordIsNotValid:
-        res.status(HttpStatus.CONFLICT);
+        res.status(HttpStatus.UNPROCESSABLE_ENTITY);
         res.json({ errors: { message: exception.errorValue().message } });
         res.send();
         return;

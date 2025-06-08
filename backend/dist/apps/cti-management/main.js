@@ -1053,7 +1053,7 @@ let UsersController = UsersController_1 = class UsersController {
     static processException(exception, res) {
         switch (exception.constructor) {
             case UserModuleException.PasswordIsNotValid:
-                res.status(common_1.HttpStatus.CONFLICT);
+                res.status(common_1.HttpStatus.UNPROCESSABLE_ENTITY);
                 res.json({ errors: { message: exception.errorValue().message } });
                 res.send();
                 return;

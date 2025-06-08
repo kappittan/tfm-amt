@@ -1,6 +1,7 @@
-import { Container, ListGroup, Row, Badge } from "react-bootstrap";
+import { ListGroup } from "react-bootstrap";
 import { OrganizationPreview } from "./OrganizationPreview";
 import { useEffect, useState } from "react";
+import axios, { AxiosError } from "axios";
 
 interface OrganizationValues {
   id: string;
@@ -9,13 +10,55 @@ interface OrganizationValues {
   reputation: number;
 }
 
-export function OrganizationsSideBar() {
+interface OrganizationsSideBarProps {
+  setShowAlert: (show: boolean) => void;
+  setAlertVariant: (variant: string) => void;
+  setAlertHeader: (header: string) => void;
+  setAlertMessage: (message: string) => void;
+}
+
+export function OrganizationsSideBar(props: OrganizationsSideBarProps) {
   const [organizations, setOrganizations] = useState<OrganizationValues[]>([]);
 
   const fetchOrganizations = async () => {
-    const response = await fetch("http://localhost:3000/organizations");
-    const data = await response.json();
-    setOrganizations(data.data);
+    try {
+      const response = await axios.get("http://localhost:3001/organizations", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (response.status === 200) {
+        const data = response.data;
+        setOrganizations(data.data);
+      }
+    } catch (err) {
+      const error = err as AxiosError;
+      if (error.response) {
+        switch (error.response.status) {
+          default:
+            props.setShowAlert(true);
+            props.setAlertVariant("danger");
+            props.setAlertHeader("Internal Server Error");
+            props.setAlertMessage(
+              "An internal server error occurred. Please try again later."
+            );
+            break;
+        }
+      } else if (error.request) {
+        props.setShowAlert(true);
+        props.setAlertVariant("danger");
+        props.setAlertHeader("Network Error");
+        props.setAlertMessage(
+          "No response received from the server. Please check your network connection."
+        );
+      } else {
+        props.setShowAlert(true);
+        props.setAlertVariant("danger");
+        props.setAlertHeader("Error");
+        props.setAlertMessage("An unknown error occurred: " + error.message);
+      }
+    }
   };
 
   useEffect(() => {
@@ -26,20 +69,19 @@ export function OrganizationsSideBar() {
     }, 10000); // Cada 10 segundos
 
     return () => clearInterval(interval); // Limpieza del intervalo al desmontar el componente
-  }, []);
+  });
 
   return (
-    <Container fluid className="my-2">
-      <Row>
-        <Badge bg="dark">Organizations</Badge>
-      </Row>
-      <Row>
-        <div
-          className="overflow-auto vh-50 border rounded p-2 my-2"
-          style={{ maxHeight: "400px" }}
-        >
-          {organizations.map((org) => (
-            <ListGroup className="mx-2 my-2">
+    <>
+      <div
+        className="p-2 my-2"
+        style={{ overflowY: "auto", maxHeight: "calc(100vh - 220px)" }}
+      >
+        {organizations.length === 0 ? (
+          <p className="text-center text-light">No organizations found.</p>
+        ) : (
+          organizations.map((org) => (
+            <ListGroup className="mx-2 my-2" key={org.name}>
               <ListGroup.Item style={{ backgroundColor: "#D1A3FF" }}>
                 <OrganizationPreview
                   organizationName={org.name}
@@ -47,9 +89,9 @@ export function OrganizationsSideBar() {
                 />
               </ListGroup.Item>
             </ListGroup>
-          ))}
-        </div>
-      </Row>
-    </Container>
+          ))
+        )}
+      </div>
+    </>
   );
 }

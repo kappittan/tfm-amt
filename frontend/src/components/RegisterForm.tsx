@@ -2,18 +2,83 @@ import { useEffect, useState } from "react";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import { Col, Container, ListGroup, Row } from "react-bootstrap";
+import axios, { AxiosError } from "axios";
+import { useNavigate } from "react-router-dom";
 
-export function RegisterForm() {
+interface RegisterFormProps {
+  setShowAlert: (show: boolean) => void;
+  setAlertVariant: (variant: string) => void;
+  setAlertMessage: (message: string) => void;
+  setAlertHeader: (header: string) => void;
+}
+
+export function RegisterForm(props: RegisterFormProps) {
   const [datos, setDatos] = useState({
     name: "",
     password: "",
     description: "",
   });
 
-  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-  const [showErrorAlert, setShowErrorAlert] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [errorHeader, setErrorHeader] = useState("");
+  const navigate = useNavigate();
+
+  const registerToPlatform = async () => {
+    try {
+      const response = await axios.post("http://localhost:3001/organizations", {
+        name: datos.name,
+        password: datos.password,
+        description: datos.description,
+      });
+
+      if (response.status === 200) {
+        props.setShowAlert(true);
+        props.setAlertVariant("success");
+        props.setAlertHeader("Registration successful");
+        props.setAlertMessage(
+          "You have successfully registered. Redirecting to home..."
+        );
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        navigate("/");
+      }
+    } catch (err) {
+      const error = err as AxiosError;
+      if (error.response) {
+        switch (error.response.status) {
+          case 400:
+            props.setShowAlert(true);
+            props.setAlertVariant("danger");
+            props.setAlertHeader("Registration failed");
+            props.setAlertMessage("Please fill in all fields correctly.");
+            break;
+          case 422:
+            props.setShowAlert(true);
+            props.setAlertVariant("danger");
+            props.setAlertHeader("Invalid password");
+            props.setAlertMessage(
+              "The password you entered is incorrect. Use at least 8 characters, including uppercase, lowercase, numbers, and special characters."
+            );
+            break;
+          case 409:
+            props.setShowAlert(true);
+            props.setAlertVariant("danger");
+            props.setAlertHeader("The organization already exists");
+            props.setAlertMessage(
+              "An organization with this name already exists. Please choose a different name."
+            );
+            break;
+          default:
+            props.setShowAlert(true);
+            props.setAlertVariant("danger");
+            props.setAlertHeader("Error");
+            props.setAlertMessage(
+              "An unexpected error occurred. Please try again later."
+            );
+            break;
+        }
+      }
+    }
+  };
 
   function handleChangeName(e: React.SyntheticEvent) {
     setDatos((values) => ({ ...values, name: e.target.value }));
@@ -25,25 +90,6 @@ export function RegisterForm() {
 
   function handleChangeDescription(e: React.SyntheticEvent) {
     setDatos((values) => ({ ...values, description: e.target.value }));
-  }
-
-  async function handleSubmit(e: React.SyntheticEvent) {
-    e.preventDefault();
-    const response = await fetch("http://localhost:3000/organizations", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(datos),
-    });
-
-    if (response.ok) {
-      setShowSuccessAlert(true);
-    } else {
-      setErrorHeader("Error");
-      setErrorMessage("An error occurred while creating the organization.");
-      setShowErrorAlert(true);
-    }
   }
 
   return (
@@ -91,7 +137,9 @@ export function RegisterForm() {
                   <Button
                     variant="primary"
                     type="submit"
-                    onClick={handleSubmit}
+                    onClick={(e) => {
+                      registerToPlatform();
+                    }}
                   >
                     Create organization
                   </Button>

@@ -1,17 +1,26 @@
 import { Alert, Col, Container, Row } from "react-bootstrap";
-import { NavBar } from "../components/NavBar";
 import logo from "../assets/ctishield.svg";
 import { LoginForm } from "../components/LoginForm";
-import { Footer } from "../components/Footer";
+import { useState } from "react";
 
 export function HomePage() {
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertVariant, setAlertVariant] = useState("success");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertHeader, setAlertHeader] = useState("");
+
   return (
     <>
       <Container fluid>
         <Row>
-          <Alert show={false} variant="danger" dismissible>
-            <Alert.Heading>Test</Alert.Heading>
-            <p>Test</p>
+          <Alert
+            show={showAlert}
+            variant={alertVariant}
+            onClose={() => setShowAlert(false)}
+            dismissible
+          >
+            <Alert.Heading>{alertHeader}</Alert.Heading>
+            <p>{alertMessage}</p>
           </Alert>
         </Row>
         <Row className="my-5 mx-3">
@@ -41,7 +50,12 @@ export function HomePage() {
               </h3>
             </Row>
             <Row>
-              <LoginForm />
+              <LoginForm
+                setAlertHeader={setAlertHeader}
+                setAlertMessage={setAlertMessage}
+                setAlertVariant={setAlertVariant}
+                setShowAlert={setShowAlert}
+              />
             </Row>
           </Col>
         </Row>

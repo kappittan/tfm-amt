@@ -1,3 +1,4 @@
+import axios, { AxiosError } from "axios";
 import { StatusCodes } from "http-status-codes";
 import { useState } from "react";
 import {
@@ -11,15 +12,17 @@ import {
 } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 
-export function LoginForm() {
+interface LoginFormProps {
+  setShowAlert: (show: boolean) => void;
+  setAlertVariant: (variant: string) => void;
+  setAlertMessage: (message: string) => void;
+  setAlertHeader: (header: string) => void;
+}
+
+export function LoginForm(props: LoginFormProps) {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertVariant, setAlertVariant] = useState("success");
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertHeader, setAlertHeader] = useState("");
 
   function handleChangeUsername(e: React.SyntheticEvent) {
     setUsername(e.target.value);
@@ -29,27 +32,66 @@ export function LoginForm() {
     setPassword(e.target.value);
   }
 
-  async function handleSubmit(e: React.SyntheticEvent) {
-    e.preventDefault();
-    const response = await fetch("http://localhost:3000/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username, password }),
-    });
+  const loginToPlatform = async () => {
+    try {
+      const response = await axios.post("http://localhost:3001/auth/login", {
+        username,
+        password,
+      });
 
-    if (response.ok) {
-      const data = await response.json();
-      localStorage.setItem("token", data.access_token);
-      localStorage.setItem("user_id", data.user_id);
-      localStorage.setItem("username", data.username);
+      if (response.status === 200) {
+        const data = await response.data;
+        localStorage.setItem("token", data.access_token);
+        localStorage.setItem("user_id", data.user_id);
+        localStorage.setItem("username", data.username);
 
-      navigate("/dashboard");
-    } else {
-      alert("Error");
+        props.setShowAlert(true);
+        props.setAlertVariant("success");
+        props.setAlertHeader("Login successful");
+        props.setAlertMessage("You have successfully logged in.");
+
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        navigate("/dashboard");
+      }
+    } catch (err) {
+      const error = err as AxiosError;
+      if (error.response) {
+        switch (error.response.status) {
+          case 400:
+            props.setShowAlert(true);
+            props.setAlertVariant("danger");
+            props.setAlertHeader("Login failed");
+            props.setAlertMessage("Invalid username or password.");
+            break;
+          case 401:
+            props.setShowAlert(true);
+            props.setAlertVariant("danger");
+            props.setAlertHeader("Invalid password");
+            props.setAlertMessage(
+              "The password you entered is incorrect. Please try again."
+            );
+            break;
+          case 404:
+            props.setShowAlert(true);
+            props.setAlertVariant("danger");
+            props.setAlertHeader("Organization not found");
+            props.setAlertMessage(
+              "The organization you are trying to log in to does not exist."
+            );
+            break;
+          default:
+            props.setShowAlert(true);
+            props.setAlertVariant("danger");
+            props.setAlertHeader("Error");
+            props.setAlertMessage(
+              "An unexpected error occurred. Please try again later."
+            );
+            break;
+        }
+      }
     }
-  }
+  };
 
   return (
     <div>
@@ -83,7 +125,13 @@ export function LoginForm() {
             <Col></Col>
             <Col>
               <Row>
-                <Button variant="primary" type="submit" onClick={handleSubmit}>
+                <Button
+                  variant="primary"
+                  type="submit"
+                  onClick={(e) => {
+                    loginToPlatform();
+                  }}
+                >
                   Log in
                 </Button>
               </Row>
