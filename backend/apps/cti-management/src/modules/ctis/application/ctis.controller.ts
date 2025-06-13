@@ -13,7 +13,6 @@ import { Exception } from '@app/common-lib/core/exceptions/Exception';
 import * as CTIModuleException from '../exceptions';
 import { Response, Request } from 'express';
 import { CTIMapper } from '../mapper/cti.mapper';
-import { CTI } from '../domain';
 import { GetUserId } from '@app/common-lib/auth/decorator/get-user-id.decorator';
 
 @Controller('ctis')
@@ -28,7 +27,7 @@ export class CtisController {
         res.send();
         return;
       case CTIModuleException.InvalidSTIXFormat:
-        res.status(HttpStatus.BAD_REQUEST);
+        res.status(HttpStatus.UNPROCESSABLE_ENTITY);
         res.json({ errors: { message: exception.errorValue().message } });
         res.send();
         return;
@@ -37,10 +36,16 @@ export class CtisController {
         res.json({ errors: { message: exception.errorValue().message } });
         res.send();
         return;
+      case CTIModuleException.OrganizationNotFound:
+        res.status(HttpStatus.NOT_FOUND);
+        res.json({ errors: { message: exception.errorValue().message } });
+        res.send();
+        return;
       default:
         res.status(HttpStatus.INTERNAL_SERVER_ERROR);
         res.json({ errors: { message: 'Internal server error' } });
         res.send();
+        return;
     }
   }
 
@@ -76,7 +81,15 @@ export class CtisController {
   }
 
   @Get(':id')
-  async getCTI(@Param('id') id: string) {
-    return this.ctisService.getCTIById(id);
+  async getCTI(@Param('id') id: string, @Res() res: Response) {
+    const result = await this.ctisService.getCTIById(id);
+
+    if (result.isLeft()) {
+      this.processException(result.value, res);
+    } else {
+      res.status(HttpStatus.OK);
+      res.json(CTIMapper.toDTO(result.value));
+      res.send();
+    }
   }
 }

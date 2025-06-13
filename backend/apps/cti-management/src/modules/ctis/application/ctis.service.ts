@@ -24,11 +24,19 @@ export class CtisService {
   ) {}
 
   async getAllCTIs(): Promise<Domain.CTI[]> {
-    return this.ctiRepository.findAll();
+    return await this.ctiRepository.findAll();
   }
 
-  async getCTIById(id: string): Promise<Domain.CTI> {
-    return this.ctiRepository.findById(id);
+  async getCTIById(
+    id: string,
+  ): Promise<Either<Exception.CTINotFound, Domain.CTI>> {
+    const result = await this.ctiRepository.findById(id);
+
+    if (!result) {
+      return left(Exception.CTINotFound.create(id));
+    }
+
+    return right(result);
   }
 
   async uploadCTI(
@@ -38,7 +46,9 @@ export class CtisService {
     owner: string,
   ): Promise<
     Either<
-      Exception.CTIAssessmentModuleError | Exception.InvalidSTIXFormat,
+      | Exception.CTIAssessmentModuleError
+      | Exception.InvalidSTIXFormat
+      | Exception.OrganizationNotFound,
       Result<Domain.CTI>
     >
   > {
@@ -46,7 +56,7 @@ export class CtisService {
       // 1. Assess the quality of the CTI
       // 1.1. Make a request to the CTI assessment service
       const response = await axios.get<CTIAssessmentResponse>(
-        'http://localhost:8000/yup',
+        'http://localhost:4000/assess',
       );
       const data = response.data;
 
@@ -61,7 +71,7 @@ export class CtisService {
       const previousReputation = await this.getOrganizationReputation(owner);
 
       if (previousReputation < 0) {
-        // Lanzar error de que no se encontró la organización
+        return left(Exception.OrganizationNotFound.create(owner));
       }
 
       const newReputation = this.getReputationFromQualityValue(
@@ -75,7 +85,7 @@ export class CtisService {
       );
 
       if (update === 'ERROR') {
-        // Lanzar error de que no se pudo actualizar la reputación
+        return left(Exception.OrganizationNotFound.create(owner));
       }
 
       // 3. Create a new CTI instance

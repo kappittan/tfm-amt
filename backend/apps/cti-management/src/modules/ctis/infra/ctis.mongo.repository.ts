@@ -30,6 +30,15 @@ export class CTIMongoRepository extends CTIRepository {
   }
 
   async findById(id: string): Promise<Domain.CTI> {
-    return this.ctiModel.findOne({ id }).exec().then(CTIMapper.toDomain);
+    const result = this.ctiModel
+      .findOne({ id })
+      .exec()
+      .then(CTIMapper.toDomain);
+
+    if (!result) {
+      return null;
+    }
+
+    return result;
   }
 }

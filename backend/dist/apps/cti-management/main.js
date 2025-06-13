@@ -64,12 +64,12 @@ exports.CtisModule = void 0;
 const common_1 = __webpack_require__(3);
 const mongoose_1 = __webpack_require__(4);
 const ctis_service_1 = __webpack_require__(6);
-const ctis_controller_1 = __webpack_require__(25);
-const CTI_1 = __webpack_require__(31);
+const ctis_controller_1 = __webpack_require__(30);
+const CTI_1 = __webpack_require__(36);
 const _ctis_repository_1 = __webpack_require__(7);
-const ctis_mongo_repository_1 = __webpack_require__(32);
-const microservices_1 = __webpack_require__(23);
-const users_management_module_1 = __webpack_require__(35);
+const ctis_mongo_repository_1 = __webpack_require__(37);
+const microservices_1 = __webpack_require__(28);
+const users_management_module_1 = __webpack_require__(40);
 let CtisModule = class CtisModule {
 };
 exports.CtisModule = CtisModule;
@@ -125,25 +125,29 @@ const common_1 = __webpack_require__(3);
 const _ctis_repository_1 = __webpack_require__(7);
 const Domain = __webpack_require__(9);
 const Exception = __webpack_require__(16);
-const axios_1 = __webpack_require__(21);
-const Either_1 = __webpack_require__(22);
+const axios_1 = __webpack_require__(26);
+const Either_1 = __webpack_require__(27);
 const Result_1 = __webpack_require__(15);
-const microservices_1 = __webpack_require__(23);
-const rxjs_1 = __webpack_require__(24);
+const microservices_1 = __webpack_require__(28);
+const rxjs_1 = __webpack_require__(29);
 let CtisService = class CtisService {
     constructor(ctiRepository, client) {
         this.ctiRepository = ctiRepository;
         this.client = client;
     }
     async getAllCTIs() {
-        return this.ctiRepository.findAll();
+        return await this.ctiRepository.findAll();
     }
     async getCTIById(id) {
-        return this.ctiRepository.findById(id);
+        const result = await this.ctiRepository.findById(id);
+        if (!result) {
+            return (0, Either_1.left)(Exception.CTINotFound.create(id));
+        }
+        return (0, Either_1.right)(result);
     }
     async uploadCTI(name, description, content, owner) {
         try {
-            const response = await axios_1.default.get('http://localhost:8000/yup');
+            const response = await axios_1.default.get('http://localhost:4000/assess');
             const data = response.data;
             const qualityValue = 0.1 * data.interoperability +
                 0.2 * data.completeness +
@@ -151,10 +155,12 @@ let CtisService = class CtisService {
                 0.4 * data.consistency;
             const previousReputation = await this.getOrganizationReputation(owner);
             if (previousReputation < 0) {
+                return (0, Either_1.left)(Exception.OrganizationNotFound.create(owner));
             }
             const newReputation = this.getReputationFromQualityValue(previousReputation, qualityValue);
             const update = await this.updateOrganizationReputation(owner, newReputation);
             if (update === 'ERROR') {
+                return (0, Either_1.left)(Exception.OrganizationNotFound.create(owner));
             }
             const cti = Domain.CTI.create({
                 name,
@@ -445,13 +451,15 @@ exports.Result = Result;
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.CTIAssessmentModuleError = exports.InvalidSTIXFormat = exports.CTINotFound = void 0;
+exports.OrganizationNotFound = exports.CTIAssessmentModuleError = exports.InvalidSTIXFormat = exports.CTINotFound = void 0;
 const CTINotFound_1 = __webpack_require__(17);
 Object.defineProperty(exports, "CTINotFound", ({ enumerable: true, get: function () { return CTINotFound_1.CTINotFound; } }));
 const InvalidSTIXFormat_1 = __webpack_require__(19);
 Object.defineProperty(exports, "InvalidSTIXFormat", ({ enumerable: true, get: function () { return InvalidSTIXFormat_1.InvalidSTIXFormat; } }));
 const CTIAssessmentModuleError_1 = __webpack_require__(20);
 Object.defineProperty(exports, "CTIAssessmentModuleError", ({ enumerable: true, get: function () { return CTIAssessmentModuleError_1.CTIAssessmentModuleError; } }));
+const exceptions_1 = __webpack_require__(21);
+Object.defineProperty(exports, "OrganizationNotFound", ({ enumerable: true, get: function () { return exceptions_1.OrganizationNotFound; } }));
 
 
 /***/ }),
@@ -520,7 +528,7 @@ exports.CTIAssessmentModuleError = void 0;
 const Exception_1 = __webpack_require__(18);
 class CTIAssessmentModuleError extends Exception_1.Exception {
     constructor() {
-        super('An error occurred in the CTI assessment module');
+        super('An error occurred in the CTI assessment module. Verify that the CTI complies with the established restrictions.');
     }
     static create() {
         return new CTIAssessmentModuleError();
@@ -531,12 +539,105 @@ exports.CTIAssessmentModuleError = CTIAssessmentModuleError;
 
 /***/ }),
 /* 21 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.OrganizationNotCreated = exports.OrganizationNotFound = exports.OrganizationNameIsTaken = exports.PasswordIsNotValid = void 0;
+const PasswordIsNotValid_1 = __webpack_require__(22);
+Object.defineProperty(exports, "PasswordIsNotValid", ({ enumerable: true, get: function () { return PasswordIsNotValid_1.PasswordIsNotValid; } }));
+const OrganizationNameIsTaken_1 = __webpack_require__(23);
+Object.defineProperty(exports, "OrganizationNameIsTaken", ({ enumerable: true, get: function () { return OrganizationNameIsTaken_1.OrganizationNameIsTaken; } }));
+const OrganizationNotFound_1 = __webpack_require__(24);
+Object.defineProperty(exports, "OrganizationNotFound", ({ enumerable: true, get: function () { return OrganizationNotFound_1.OrganizationNotFound; } }));
+const OrganizationNotCreated_1 = __webpack_require__(25);
+Object.defineProperty(exports, "OrganizationNotCreated", ({ enumerable: true, get: function () { return OrganizationNotCreated_1.OrganizationNotCreated; } }));
+
+
+/***/ }),
+/* 22 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PasswordIsNotValid = void 0;
+const Exception_1 = __webpack_require__(18);
+class PasswordIsNotValid extends Exception_1.Exception {
+    constructor(message) {
+        super(message);
+    }
+    static create(message) {
+        return new PasswordIsNotValid(message);
+    }
+}
+exports.PasswordIsNotValid = PasswordIsNotValid;
+
+
+/***/ }),
+/* 23 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.OrganizationNameIsTaken = void 0;
+const Exception_1 = __webpack_require__(18);
+class OrganizationNameIsTaken extends Exception_1.Exception {
+    constructor(name) {
+        super(`The name "${name}" for the new organization is already taken`);
+    }
+    static create(name) {
+        return new OrganizationNameIsTaken(name);
+    }
+}
+exports.OrganizationNameIsTaken = OrganizationNameIsTaken;
+
+
+/***/ }),
+/* 24 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.OrganizationNotFound = void 0;
+const Exception_1 = __webpack_require__(18);
+class OrganizationNotFound extends Exception_1.Exception {
+    constructor(id) {
+        super(`The organization with id "${id}" does not exist`);
+    }
+    static create(id) {
+        return new OrganizationNotFound(id);
+    }
+}
+exports.OrganizationNotFound = OrganizationNotFound;
+
+
+/***/ }),
+/* 25 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.OrganizationNotCreated = void 0;
+const Exception_1 = __webpack_require__(18);
+class OrganizationNotCreated extends Exception_1.Exception {
+    constructor(message) {
+        super(message);
+    }
+    static create(message) {
+        return new OrganizationNotCreated(message);
+    }
+}
+exports.OrganizationNotCreated = OrganizationNotCreated;
+
+
+/***/ }),
+/* 26 */
 /***/ ((module) => {
 
 module.exports = require("axios");
 
 /***/ }),
-/* 22 */
+/* 27 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -577,19 +678,19 @@ exports.right = right;
 
 
 /***/ }),
-/* 23 */
+/* 28 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/microservices");
 
 /***/ }),
-/* 24 */
+/* 29 */
 /***/ ((module) => {
 
 module.exports = require("rxjs");
 
 /***/ }),
-/* 25 */
+/* 30 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -605,16 +706,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CtisController = void 0;
 const common_1 = __webpack_require__(3);
 const ctis_service_1 = __webpack_require__(6);
-const create_cti_dto_1 = __webpack_require__(26);
+const create_cti_dto_1 = __webpack_require__(31);
 const CTIModuleException = __webpack_require__(16);
-const express_1 = __webpack_require__(28);
-const cti_mapper_1 = __webpack_require__(29);
-const get_user_id_decorator_1 = __webpack_require__(30);
+const express_1 = __webpack_require__(33);
+const cti_mapper_1 = __webpack_require__(34);
+const get_user_id_decorator_1 = __webpack_require__(35);
 let CtisController = class CtisController {
     constructor(ctisService) {
         this.ctisService = ctisService;
@@ -636,10 +737,16 @@ let CtisController = class CtisController {
                 res.json({ errors: { message: exception.errorValue().message } });
                 res.send();
                 return;
+            case CTIModuleException.OrganizationNotFound:
+                res.status(common_1.HttpStatus.NOT_FOUND);
+                res.json({ errors: { message: exception.errorValue().message } });
+                res.send();
+                return;
             default:
                 res.status(common_1.HttpStatus.INTERNAL_SERVER_ERROR);
                 res.json({ errors: { message: 'Internal server error' } });
                 res.send();
+                return;
         }
     }
     async uploadCTI(createCTIDto, userId, res) {
@@ -659,8 +766,16 @@ let CtisController = class CtisController {
         res.json({ data: ctis.map((cti) => cti_mapper_1.CTIMapper.toDTO(cti)) });
         res.end();
     }
-    async getCTI(id) {
-        return this.ctisService.getCTIById(id);
+    async getCTI(id, res) {
+        const result = await this.ctisService.getCTIById(id);
+        if (result.isLeft()) {
+            this.processException(result.value, res);
+        }
+        else {
+            res.status(common_1.HttpStatus.OK);
+            res.json(cti_mapper_1.CTIMapper.toDTO(result.value));
+            res.send();
+        }
     }
 };
 exports.CtisController = CtisController;
@@ -683,8 +798,9 @@ __decorate([
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Res)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, typeof (_e = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _e : Object]),
     __metadata("design:returntype", Promise)
 ], CtisController.prototype, "getCTI", null);
 exports.CtisController = CtisController = __decorate([
@@ -694,7 +810,7 @@ exports.CtisController = CtisController = __decorate([
 
 
 /***/ }),
-/* 26 */
+/* 31 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -709,7 +825,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CreateCTIDto = void 0;
-const class_validator_1 = __webpack_require__(27);
+const class_validator_1 = __webpack_require__(32);
 class CreateCTIDto {
 }
 exports.CreateCTIDto = CreateCTIDto;
@@ -731,19 +847,19 @@ __decorate([
 
 
 /***/ }),
-/* 27 */
+/* 32 */
 /***/ ((module) => {
 
 module.exports = require("class-validator");
 
 /***/ }),
-/* 28 */
+/* 33 */
 /***/ ((module) => {
 
 module.exports = require("express");
 
 /***/ }),
-/* 29 */
+/* 34 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -789,7 +905,7 @@ exports.CTIMapper = CTIMapper;
 
 
 /***/ }),
-/* 30 */
+/* 35 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -805,7 +921,7 @@ exports.GetUserId = (0, common_1.createParamDecorator)((data, ctx) => {
 
 
 /***/ }),
-/* 31 */
+/* 36 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -860,7 +976,7 @@ exports.CTISchema = mongoose_1.SchemaFactory.createForClass(CTI);
 
 
 /***/ }),
-/* 32 */
+/* 37 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -880,11 +996,11 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CTIMongoRepository = void 0;
 const _ctis_repository_1 = __webpack_require__(7);
-const Persistence = __webpack_require__(33);
+const Persistence = __webpack_require__(38);
 const mongoose_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(3);
-const mongoose_2 = __webpack_require__(34);
-const cti_mapper_1 = __webpack_require__(29);
+const mongoose_2 = __webpack_require__(39);
+const cti_mapper_1 = __webpack_require__(34);
 let CTIMongoRepository = class CTIMongoRepository extends _ctis_repository_1.CTIRepository {
     constructor(ctiModel) {
         super();
@@ -902,7 +1018,14 @@ let CTIMongoRepository = class CTIMongoRepository extends _ctis_repository_1.CTI
             .then(cti_mapper_1.CTIMapper.toDomain);
     }
     async findById(id) {
-        return this.ctiModel.findOne({ id }).exec().then(cti_mapper_1.CTIMapper.toDomain);
+        const result = this.ctiModel
+            .findOne({ id })
+            .exec()
+            .then(cti_mapper_1.CTIMapper.toDomain);
+        if (!result) {
+            return null;
+        }
+        return result;
     }
 };
 exports.CTIMongoRepository = CTIMongoRepository;
@@ -914,24 +1037,24 @@ exports.CTIMongoRepository = CTIMongoRepository = __decorate([
 
 
 /***/ }),
-/* 33 */
+/* 38 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CTI = void 0;
-const CTI_1 = __webpack_require__(31);
+const CTI_1 = __webpack_require__(36);
 Object.defineProperty(exports, "CTI", ({ enumerable: true, get: function () { return CTI_1.CTI; } }));
 
 
 /***/ }),
-/* 34 */
+/* 39 */
 /***/ ((module) => {
 
 module.exports = require("mongoose");
 
 /***/ }),
-/* 35 */
+/* 40 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -944,8 +1067,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UsersManagementModule = void 0;
 const common_1 = __webpack_require__(3);
-const typeorm_1 = __webpack_require__(36);
-const users_module_1 = __webpack_require__(37);
+const typeorm_1 = __webpack_require__(41);
+const users_module_1 = __webpack_require__(42);
 const auth_module_1 = __webpack_require__(61);
 let UsersManagementModule = class UsersManagementModule {
 };
@@ -973,13 +1096,13 @@ exports.UsersManagementModule = UsersManagementModule = __decorate([
 
 
 /***/ }),
-/* 36 */
+/* 41 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/typeorm");
 
 /***/ }),
-/* 37 */
+/* 42 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -992,11 +1115,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UsersModule = void 0;
 const common_1 = __webpack_require__(3);
-const users_controller_1 = __webpack_require__(38);
-const users_service_1 = __webpack_require__(39);
-const typeorm_1 = __webpack_require__(36);
+const users_controller_1 = __webpack_require__(43);
+const users_service_1 = __webpack_require__(44);
+const typeorm_1 = __webpack_require__(41);
 const Persistence = __webpack_require__(56);
-const users_repository_1 = __webpack_require__(46);
+const users_repository_1 = __webpack_require__(51);
 const users_repository_typeorm_1 = __webpack_require__(59);
 let UsersModule = class UsersModule {
 };
@@ -1018,7 +1141,7 @@ exports.UsersModule = UsersModule = __decorate([
 
 
 /***/ }),
-/* 38 */
+/* 43 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -1039,13 +1162,13 @@ var _a, _b, _c, _d, _e, _f, _g, _h;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UsersController = void 0;
 const common_1 = __webpack_require__(3);
-const express_1 = __webpack_require__(28);
-const users_service_1 = __webpack_require__(39);
+const express_1 = __webpack_require__(33);
+const users_service_1 = __webpack_require__(44);
 const create_organization_dto_1 = __webpack_require__(53);
-const UserModuleException = __webpack_require__(47);
+const UserModuleException = __webpack_require__(21);
 const public_decorator_1 = __webpack_require__(54);
 const organization_mapper_1 = __webpack_require__(55);
-const microservices_1 = __webpack_require__(23);
+const microservices_1 = __webpack_require__(28);
 let UsersController = UsersController_1 = class UsersController {
     constructor(usersService) {
         this.usersService = usersService;
@@ -1187,7 +1310,7 @@ exports.UsersController = UsersController = UsersController_1 = __decorate([
 
 
 /***/ }),
-/* 39 */
+/* 44 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -1204,11 +1327,11 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UsersService = void 0;
 const common_1 = __webpack_require__(3);
-const Domain = __webpack_require__(40);
+const Domain = __webpack_require__(45);
 const Result_1 = __webpack_require__(15);
-const users_repository_1 = __webpack_require__(46);
-const Either_1 = __webpack_require__(22);
-const Exceptions = __webpack_require__(47);
+const users_repository_1 = __webpack_require__(51);
+const Either_1 = __webpack_require__(27);
+const Exceptions = __webpack_require__(21);
 const role_enum_1 = __webpack_require__(52);
 let UsersService = class UsersService {
     constructor(organizationRepository) {
@@ -1285,20 +1408,20 @@ exports.UsersService = UsersService = __decorate([
 
 
 /***/ }),
-/* 40 */
+/* 45 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Password = exports.Organization = void 0;
-const Organization_1 = __webpack_require__(41);
+const Organization_1 = __webpack_require__(46);
 Object.defineProperty(exports, "Organization", ({ enumerable: true, get: function () { return Organization_1.Organization; } }));
-const Password_1 = __webpack_require__(42);
+const Password_1 = __webpack_require__(47);
 Object.defineProperty(exports, "Password", ({ enumerable: true, get: function () { return Password_1.Password; } }));
 
 
 /***/ }),
-/* 41 */
+/* 46 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1358,15 +1481,15 @@ exports.Organization = Organization;
 
 
 /***/ }),
-/* 42 */
+/* 47 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Password = void 0;
-const ValueObject_1 = __webpack_require__(43);
+const ValueObject_1 = __webpack_require__(48);
 const Result_1 = __webpack_require__(15);
-const bcrypt = __webpack_require__(45);
+const bcrypt = __webpack_require__(50);
 class Password extends ValueObject_1.ValueObject {
     constructor(props) {
         super(props);
@@ -1410,13 +1533,13 @@ exports.Password = Password;
 
 
 /***/ }),
-/* 43 */
+/* 48 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ValueObject = void 0;
-const shallow_equal_object_1 = __webpack_require__(44);
+const shallow_equal_object_1 = __webpack_require__(49);
 class ValueObject {
     constructor(props) {
         this.props = Object.freeze(props);
@@ -1435,19 +1558,19 @@ exports.ValueObject = ValueObject;
 
 
 /***/ }),
-/* 44 */
+/* 49 */
 /***/ ((module) => {
 
 module.exports = require("shallow-equal-object");
 
 /***/ }),
-/* 45 */
+/* 50 */
 /***/ ((module) => {
 
 module.exports = require("bcrypt");
 
 /***/ }),
-/* 46 */
+/* 51 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1457,99 +1580,6 @@ const repository_1 = __webpack_require__(8);
 class UserRepository extends repository_1.Repository {
 }
 exports.UserRepository = UserRepository;
-
-
-/***/ }),
-/* 47 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.OrganizationNotCreated = exports.OrganizationNotFound = exports.OrganizationNameIsTaken = exports.PasswordIsNotValid = void 0;
-const PasswordIsNotValid_1 = __webpack_require__(48);
-Object.defineProperty(exports, "PasswordIsNotValid", ({ enumerable: true, get: function () { return PasswordIsNotValid_1.PasswordIsNotValid; } }));
-const OrganizationNameIsTaken_1 = __webpack_require__(49);
-Object.defineProperty(exports, "OrganizationNameIsTaken", ({ enumerable: true, get: function () { return OrganizationNameIsTaken_1.OrganizationNameIsTaken; } }));
-const OrganizationNotFound_1 = __webpack_require__(50);
-Object.defineProperty(exports, "OrganizationNotFound", ({ enumerable: true, get: function () { return OrganizationNotFound_1.OrganizationNotFound; } }));
-const OrganizationNotCreated_1 = __webpack_require__(51);
-Object.defineProperty(exports, "OrganizationNotCreated", ({ enumerable: true, get: function () { return OrganizationNotCreated_1.OrganizationNotCreated; } }));
-
-
-/***/ }),
-/* 48 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.PasswordIsNotValid = void 0;
-const Exception_1 = __webpack_require__(18);
-class PasswordIsNotValid extends Exception_1.Exception {
-    constructor(message) {
-        super(message);
-    }
-    static create(message) {
-        return new PasswordIsNotValid(message);
-    }
-}
-exports.PasswordIsNotValid = PasswordIsNotValid;
-
-
-/***/ }),
-/* 49 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.OrganizationNameIsTaken = void 0;
-const Exception_1 = __webpack_require__(18);
-class OrganizationNameIsTaken extends Exception_1.Exception {
-    constructor(name) {
-        super(`The name "${name}" for the new organization is already taken`);
-    }
-    static create(name) {
-        return new OrganizationNameIsTaken(name);
-    }
-}
-exports.OrganizationNameIsTaken = OrganizationNameIsTaken;
-
-
-/***/ }),
-/* 50 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.OrganizationNotFound = void 0;
-const Exception_1 = __webpack_require__(18);
-class OrganizationNotFound extends Exception_1.Exception {
-    constructor(id) {
-        super(`The organization with id "${id}" does not exist`);
-    }
-    static create(id) {
-        return new OrganizationNotFound(id);
-    }
-}
-exports.OrganizationNotFound = OrganizationNotFound;
-
-
-/***/ }),
-/* 51 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.OrganizationNotCreated = void 0;
-const Exception_1 = __webpack_require__(18);
-class OrganizationNotCreated extends Exception_1.Exception {
-    constructor(message) {
-        super(message);
-    }
-    static create(message) {
-        return new OrganizationNotCreated(message);
-    }
-}
-exports.OrganizationNotCreated = OrganizationNotCreated;
 
 
 /***/ }),
@@ -1582,7 +1612,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CreateOrganizationDto = void 0;
-const class_validator_1 = __webpack_require__(27);
+const class_validator_1 = __webpack_require__(32);
 class CreateOrganizationDto {
 }
 exports.CreateOrganizationDto = CreateOrganizationDto;
@@ -1624,7 +1654,7 @@ exports.Public = Public;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.OrganizationMapper = void 0;
 const UniqueEntityID_1 = __webpack_require__(12);
-const Domain = __webpack_require__(40);
+const Domain = __webpack_require__(45);
 class OrganizationMapper {
     static async toDomain(raw) {
         const password = await Domain.Password.create({
@@ -1760,8 +1790,8 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.OrganizationRepositoryTypeOrm = void 0;
 const common_1 = __webpack_require__(3);
-const users_repository_1 = __webpack_require__(46);
-const typeorm_1 = __webpack_require__(36);
+const users_repository_1 = __webpack_require__(51);
+const typeorm_1 = __webpack_require__(41);
 const Persistence = __webpack_require__(56);
 const Repository_1 = __webpack_require__(60);
 const organization_mapper_1 = __webpack_require__(55);
@@ -1831,7 +1861,7 @@ exports.AuthModule = void 0;
 const common_1 = __webpack_require__(3);
 const auth_controller_1 = __webpack_require__(62);
 const auth_service_1 = __webpack_require__(63);
-const users_module_1 = __webpack_require__(37);
+const users_module_1 = __webpack_require__(42);
 const jwt_1 = __webpack_require__(64);
 const constants_1 = __webpack_require__(69);
 const core_1 = __webpack_require__(1);
@@ -1886,7 +1916,7 @@ const common_1 = __webpack_require__(3);
 const auth_service_1 = __webpack_require__(63);
 const sign_in_dto_1 = __webpack_require__(68);
 const public_decorator_1 = __webpack_require__(54);
-const express_1 = __webpack_require__(28);
+const express_1 = __webpack_require__(33);
 const AuthModuleException = __webpack_require__(65);
 let AuthController = class AuthController {
     constructor(authService) {
@@ -1953,11 +1983,11 @@ var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthService = void 0;
 const common_1 = __webpack_require__(3);
-const users_service_1 = __webpack_require__(39);
+const users_service_1 = __webpack_require__(44);
 const jwt_1 = __webpack_require__(64);
-const Either_1 = __webpack_require__(22);
+const Either_1 = __webpack_require__(27);
 const AuthModuleException = __webpack_require__(65);
-const bcrypt = __webpack_require__(45);
+const bcrypt = __webpack_require__(50);
 let AuthService = class AuthService {
     constructor(usersService, jwtService) {
         this.usersService = usersService;
@@ -2064,7 +2094,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SignInDto = void 0;
-const class_validator_1 = __webpack_require__(27);
+const class_validator_1 = __webpack_require__(32);
 class SignInDto {
 }
 exports.SignInDto = SignInDto;

@@ -1,21 +1,9 @@
-import {
-  Alert,
-  Badge,
-  Button,
-  Card,
-  Col,
-  ListGroup,
-  Offcanvas,
-  Row,
-} from "react-bootstrap";
+import { Alert, Card, Col, Row } from "react-bootstrap";
 import Container from "react-bootstrap/esm/Container";
-import { OrganizationPreview } from "../components/OrganizationPreview";
-import creditCardImage from "../assets/credit-card.png";
 import { OrganizationsSideBar } from "../components/OrganizationsSideBar";
-import { NavBar } from "../components/NavBar";
-import FilePicker from "../components/FilePicker";
 import { CTILogs } from "../components/CTILogs";
 import { useState } from "react";
+import STIXFileUploader from "../components/STIXFileUploader";
 
 export function Dashboard() {
   const [showAlert, setShowAlert] = useState(false);
@@ -66,13 +54,23 @@ export function Dashboard() {
                   <Card.Text>
                     Please upload a new CTI file by clicking the button below.
                   </Card.Text>
-                  <FilePicker></FilePicker>
+                  <STIXFileUploader
+                    setAlertHeader={setAlertHeader}
+                    setAlertMessage={setAlertMessage}
+                    setAlertVariant={setAlertVariant}
+                    setShowAlert={setShowAlert}
+                  ></STIXFileUploader>
                 </Card.Body>
               </Card>
             </Row>
             <Row className="mx-1">
               <h4 className="text-center text-light">CTI Logs</h4>
-              <CTILogs></CTILogs>
+              <CTILogs
+                setAlertHeader={setAlertHeader}
+                setAlertMessage={setAlertMessage}
+                setAlertVariant={setAlertVariant}
+                setShowAlert={setShowAlert}
+              ></CTILogs>
             </Row>
           </Col>
         </Row>
