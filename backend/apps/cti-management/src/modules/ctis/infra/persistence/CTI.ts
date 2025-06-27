@@ -14,8 +14,8 @@ export class CTI {
   @Prop()
   description: string;
 
-  @Prop()
-  content: string; // This is the STIX object content
+  @Prop({ type: Object, required: true })
+  content: any; // o simplemente: any
 
   @Prop()
   owner: string;

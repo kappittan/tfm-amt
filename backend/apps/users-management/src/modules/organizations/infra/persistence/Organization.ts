@@ -21,7 +21,7 @@ export class Organization {
   @Column()
   description: string;
 
-  @Column()
+  @Column('float')
   reputation: number;
 
   @Column()

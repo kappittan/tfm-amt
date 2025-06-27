@@ -48,7 +48,7 @@ export class UsersService {
       name: organizationValues.name,
       password: passwordOrError.getValue(),
       description: organizationValues.description,
-      reputation: 0,
+      reputation: 0.5, // Default value
       createdAt: new Date(),
     });
 
@@ -96,7 +96,7 @@ export class UsersService {
       return left(Exceptions.OrganizationNotFound.create(orgId));
     }
 
-    org.reputation = newReputation;
+    org.updateReputation(newReputation);
     await this.organizationRepository.save(org);
 
     return right(Result.ok());

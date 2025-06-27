@@ -1,20 +1,18 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './src/modules/organizations/users.module';
-import { APP_GUARD } from '@nestjs/core';
-import { AuthGuard } from '@app/common-lib/auth/auth.guard';
 import { AuthModule } from './src/modules/auth/auth.module';
-import { RolesGuard } from '@app/common-lib/auth/roles.guard';
+import { orgsEnv } from './src/modules/organizations/config/envs';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: '127.0.0.1',
-      port: 5432,
-      username: 'root',
-      password: 'root',
-      database: 'test',
+      host: orgsEnv.postgresHost,
+      port: orgsEnv.postgresPort,
+      username: orgsEnv.postgresUser,
+      password: orgsEnv.postgresPass,
+      database: orgsEnv.postgresDatabase,
       autoLoadEntities: true,
       synchronize: true,
       logging: false,

@@ -11,9 +11,9 @@ export function OrganizationPreview({
   organizationReputation,
 }: OrganizationPreviewProps) {
   let variant;
-  if (organizationReputation < 30) {
+  if (organizationReputation < 0.3) {
     variant = "danger";
-  } else if (organizationReputation < 70) {
+  } else if (organizationReputation < 0.7) {
     variant = "warning";
   } else {
     variant = "success";
@@ -31,7 +31,7 @@ export function OrganizationPreview({
           <ProgressBar
             className="mt-1"
             variant={variant}
-            now={organizationReputation}
+            now={organizationReputation * 100}
           />
         </Col>
       </Row>

@@ -101,6 +101,10 @@ export class UsersController {
       data.newReputation,
     );
 
+    console.log(
+      `Updating reputation for org ${data.orgId} to ${data.newReputation}`,
+    );
+
     if (result.isLeft()) {
       return 'ERROR';
     }

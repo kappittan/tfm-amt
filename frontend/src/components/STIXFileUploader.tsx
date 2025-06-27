@@ -42,11 +42,19 @@ export default function STIXFileUploader(props: STIXFileUploaderProps) {
     setDisableUploadButton([true]);
 
     try {
-      const response = await axios.post("http://localhost:3002/ctis", {
-        name: name,
-        description: description,
-        content: jsonData,
-      });
+      const response = await axios.post(
+        "http://localhost:3002/ctis",
+        {
+          name: name,
+          description: description,
+          content: jsonData,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
       if (response.status === 200) {
         props.setShowAlert(true);

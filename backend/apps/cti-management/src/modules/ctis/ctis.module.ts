@@ -7,6 +7,7 @@ import { CTIRepository } from './repo/ ctis.repository';
 import { CTIMongoRepository } from './infra/ctis.mongo.repository';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { UsersManagementModule } from 'apps/users-management/users-management.module';
+import { ctisEnv } from './config/envs';
 
 @Module({
   imports: [
@@ -15,8 +16,8 @@ import { UsersManagementModule } from 'apps/users-management/users-management.mo
         name: 'USER_SERVICE',
         transport: Transport.TCP,
         options: {
-          port: 3003,
-          host: 'localhost',
+          port: ctisEnv.usersPort,
+          host: ctisEnv.usersHost,
         },
       },
     ]),

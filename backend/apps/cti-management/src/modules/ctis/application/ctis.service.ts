@@ -8,12 +8,15 @@ import { Either, left, right } from '@app/common-lib/core/logic/Either';
 import { Result } from '@app/common-lib/core/logic/Result';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
+import { FilterCtiDto } from '../dto/filter-cti.dto';
+import { ctisEnv } from '../config/envs';
 
 interface CTIAssessmentResponse {
   interoperability: number;
   completeness: number;
   verifiability: number;
   consistency: number;
+  timeliness: number;
 }
 
 @Injectable()
@@ -23,8 +26,8 @@ export class CtisService {
     @Inject('USER_SERVICE') private client: ClientProxy,
   ) {}
 
-  async getAllCTIs(): Promise<Domain.CTI[]> {
-    return await this.ctiRepository.findAll();
+  async getAllCTIs(filter?: FilterCtiDto): Promise<Domain.CTI[]> {
+    return await this.ctiRepository.findAll(filter);
   }
 
   async getCTIById(
@@ -55,17 +58,21 @@ export class CtisService {
     try {
       // 1. Assess the quality of the CTI
       // 1.1. Make a request to the CTI assessment service
-      const response = await axios.get<CTIAssessmentResponse>(
-        'http://localhost:4000/assess',
+      const response = await axios.post<CTIAssessmentResponse>(
+        'http://localhost:4001/assess',
+        content,
       );
       const data = response.data;
 
       // 1.2. Calculate the quality value based on the assessment response
       const qualityValue =
-        0.1 * data.interoperability +
-        0.2 * data.completeness +
-        0.3 * data.verifiability +
-        0.4 * data.consistency;
+        ctisEnv.interoperabilityWeight * data.interoperability +
+        ctisEnv.completenessWeight * data.completeness +
+        ctisEnv.verifiabilityWeight * data.verifiability +
+        ctisEnv.consistencyWeight * data.consistency +
+        ctisEnv.timelinessWeight * data.timeliness;
+
+      console.log('Obtiene el siguiente qualityValue: ', qualityValue);
 
       // 2. Update the reputation of the organization
       const previousReputation = await this.getOrganizationReputation(owner);

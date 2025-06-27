@@ -71,6 +71,10 @@ export class Organization extends Entity<OrganizationProps> {
     this.props.createdAt = value;
   }
 
+  public updateReputation(newReputation: number) {
+    this.props.reputation = newReputation;
+  }
+
   public static create(
     props: OrganizationProps,
     id?: UniqueEntityID,

@@ -1,4 +1,4 @@
-import { ListGroup } from "react-bootstrap";
+import { Form, ListGroup } from "react-bootstrap";
 import { CTIPreview } from "./CTIPreview";
 import { useEffect, useState } from "react";
 import axios, { AxiosError } from "axios";
@@ -8,7 +8,7 @@ interface CTIValues {
   name: string;
   description: string;
   owner: string;
-  quality: number;
+  qualityValue: number;
   sharedAt: Date;
 }
 
@@ -104,6 +104,12 @@ const mockCTIs = [
 
 export function CTILogs(props: CTILogsProps) {
   const [ctis, setCtis] = useState<CTIValues[]>([]);
+  const [filterQuality, setFilterQuality] = useState<number>(30);
+
+  const handleChangeQuality = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    setFilterQuality(Number(e.target.value));
+  };
 
   const fetchCTIs = async () => {
     try {
@@ -111,11 +117,18 @@ export function CTILogs(props: CTILogsProps) {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
+        params: {
+          fromQuality: filterQuality / 100,
+        },
       });
 
       if (response.status === 200) {
         const data = response.data;
-        setCtis(data.data);
+        const mappedCTIs: CTIValues[] = data.data.map((cti: any) => ({
+          ...cti,
+          sharedAt: new Date(cti.sharedAt),
+        }));
+        setCtis(mappedCTIs);
       }
     } catch (err) {
       const error = err as AxiosError;
@@ -148,13 +161,7 @@ export function CTILogs(props: CTILogsProps) {
 
   useEffect(() => {
     fetchCTIs(); // Llamar a la API al inicio
-
-    const interval = setInterval(() => {
-      fetchCTIs();
-    }, 10000); // Cada 10 segundos
-
-    return () => clearInterval(interval); // Limpieza del intervalo al desmontar el componente
-  });
+  }, [filterQuality]);
 
   return (
     <>
@@ -162,6 +169,32 @@ export function CTILogs(props: CTILogsProps) {
         className=" p-2 my-2"
         style={{ overflowY: "auto", maxHeight: "calc(100vh - 650px)" }}
       >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-start",
+            alignItems: "center",
+            padding: "1rem",
+          }}
+        >
+          <div style={{ maxWidth: "200px", width: "100%" }}>
+            <Form>
+              <Form.Group controlId="number">
+                <Form.Label className="text-light">
+                  Filter from quality value
+                </Form.Label>
+                <Form.Control
+                  type="number"
+                  name="number"
+                  value={filterQuality}
+                  placeholder="Número"
+                  onChange={handleChangeQuality}
+                />
+              </Form.Group>
+            </Form>
+          </div>
+        </div>
+
         {ctis.length === 0 ? (
           <p className="text-center text-light">No CTIs available.</p>
         ) : (
@@ -173,7 +206,7 @@ export function CTILogs(props: CTILogsProps) {
                   ctiName={cti.name}
                   ctiDescription={cti.description}
                   ctiOwner={cti.owner}
-                  ctiQualityValue={cti.quality}
+                  ctiQualityValue={cti.qualityValue}
                   ctiSharedAt={cti.sharedAt}
                 ></CTIPreview>
               </ListGroup.Item>

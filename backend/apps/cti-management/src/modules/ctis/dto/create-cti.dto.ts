@@ -1,4 +1,5 @@
-import { IsJSON, IsNotEmpty, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsJSON, IsNotEmpty, IsObject, IsString } from 'class-validator';
 
 export class CreateCTIDto {
   @IsString()
@@ -9,7 +10,7 @@ export class CreateCTIDto {
   @IsNotEmpty()
   description: string;
 
-  @IsJSON()
-  @IsNotEmpty()
-  content: string;
+  @IsObject()
+  @Type(() => Object)
+  content: any;
 }

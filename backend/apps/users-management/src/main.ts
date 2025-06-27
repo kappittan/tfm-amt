@@ -1,6 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { UsersManagementModule } from '../users-management.module';
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { orgsEnv } from './modules/organizations/config/envs';
 
 async function bootstrap() {
   const app = await NestFactory.create(UsersManagementModule);
@@ -21,13 +23,13 @@ async function bootstrap() {
   app.connectMicroservice({
     transport: 'TCP',
     options: {
-      host: 'localhost',
-      port: 3003,
+      host: orgsEnv.host,
+      port: orgsEnv.tcpPort,
     },
   });
 
   await app.startAllMicroservices();
 
-  await app.listen(3001);
+  await app.listen(orgsEnv.restPort);
 }
 bootstrap();

@@ -24,6 +24,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(4);
 const users_module_1 = __webpack_require__(5);
 const auth_module_1 = __webpack_require__(40);
+const envs_1 = __webpack_require__(50);
 let UsersManagementModule = class UsersManagementModule {
 };
 exports.UsersManagementModule = UsersManagementModule;
@@ -32,11 +33,11 @@ exports.UsersManagementModule = UsersManagementModule = __decorate([
         imports: [
             typeorm_1.TypeOrmModule.forRoot({
                 type: 'postgres',
-                host: '127.0.0.1',
-                port: 5432,
-                username: 'root',
-                password: 'root',
-                database: 'test',
+                host: envs_1.orgsEnv.postgresHost,
+                port: envs_1.orgsEnv.postgresPort,
+                username: envs_1.orgsEnv.postgresUser,
+                password: envs_1.orgsEnv.postgresPass,
+                database: envs_1.orgsEnv.postgresDatabase,
                 autoLoadEntities: true,
                 synchronize: true,
                 logging: false,
@@ -183,6 +184,7 @@ let UsersController = UsersController_1 = class UsersController {
     }
     async updateOrganizationReputation(data) {
         const result = await this.usersService.updateOrganizationReputation(data.orgId, data.newReputation);
+        console.log(`Updating reputation for org ${data.orgId} to ${data.newReputation}`);
         if (result.isLeft()) {
             return 'ERROR';
         }
@@ -320,7 +322,7 @@ let UsersService = class UsersService {
             name: organizationValues.name,
             password: passwordOrError.getValue(),
             description: organizationValues.description,
-            reputation: 0,
+            reputation: 0.5,
             createdAt: new Date(),
         });
         if (result.isFailure) {
@@ -347,7 +349,7 @@ let UsersService = class UsersService {
         if (org === null) {
             return (0, Either_1.left)(Exceptions.OrganizationNotFound.create(orgId));
         }
-        org.reputation = newReputation;
+        org.updateReputation(newReputation);
         await this.organizationRepository.save(org);
         return (0, Either_1.right)(Result_1.Result.ok());
     }
@@ -437,6 +439,9 @@ class Organization extends Entity_1.Entity {
     }
     set createdAt(value) {
         this.props.createdAt = value;
+    }
+    updateReputation(newReputation) {
+        this.props.reputation = newReputation;
     }
     static create(props, id) {
         const organization = new Organization(props, id);
@@ -1027,7 +1032,7 @@ __decorate([
     __metadata("design:type", String)
 ], Organization.prototype, "description", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)('float'),
     __metadata("design:type", Number)
 ], Organization.prototype, "reputation", void 0);
 __decorate([
@@ -1461,6 +1466,44 @@ exports.AuthGuard = AuthGuard = __decorate([
 ], AuthGuard);
 
 
+/***/ }),
+/* 50 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.orgsEnv = void 0;
+const dotenv = __webpack_require__(51);
+const path = __webpack_require__(52);
+const config = dotenv.config({
+    path: path.resolve(__dirname, '../..', '.env'),
+});
+exports.orgsEnv = {
+    host: process.env.HOST || '127.0.0.1',
+    restPort: process.env.REST_PORT ? parseInt(process.env.REST_PORT, 10) : 3001,
+    tcpPort: process.env.TCP_PORT ? parseInt(process.env.TCP_PORT, 10) : 3003,
+    postgresHost: process.env.POSTGRES_HOST || '127.0.0.1',
+    postgresPort: process.env.POSTGRES_PORT
+        ? parseInt(process.env.POSTGRES_PORT, 10)
+        : 5432,
+    postgresUser: process.env.POSTGRES_USERNAME || 'root',
+    postgresPass: process.env.POSTGRES_PASSWORD || 'root',
+    postgresDatabase: process.env.POSTGRES_DATABASE || 'test',
+};
+
+
+/***/ }),
+/* 51 */
+/***/ ((module) => {
+
+module.exports = require("dotenv");
+
+/***/ }),
+/* 52 */
+/***/ ((module) => {
+
+module.exports = require("path");
+
 /***/ })
 /******/ 	]);
 /************************************************************************/
@@ -1498,6 +1541,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core_1 = __webpack_require__(1);
 const users_management_module_1 = __webpack_require__(2);
 const common_1 = __webpack_require__(3);
+const envs_1 = __webpack_require__(50);
 async function bootstrap() {
     const app = await core_1.NestFactory.create(users_management_module_1.UsersManagementModule);
     app.useGlobalPipes(new common_1.ValidationPipe({
@@ -1510,12 +1554,12 @@ async function bootstrap() {
     app.connectMicroservice({
         transport: 'TCP',
         options: {
-            host: 'localhost',
-            port: 3003,
+            host: envs_1.orgsEnv.host,
+            port: envs_1.orgsEnv.tcpPort,
         },
     });
     await app.startAllMicroservices();
-    await app.listen(3001);
+    await app.listen(envs_1.orgsEnv.restPort);
 }
 bootstrap();
 

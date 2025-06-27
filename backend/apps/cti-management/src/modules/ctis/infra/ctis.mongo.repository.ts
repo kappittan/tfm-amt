@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { CTIMapper } from '../mapper/cti.mapper';
+import { FilterCtiDto } from '../dto/filter-cti.dto';
 
 @Injectable()
 export class CTIMongoRepository extends CTIRepository {
@@ -15,9 +16,19 @@ export class CTIMongoRepository extends CTIRepository {
     super();
   }
 
-  async findAll(): Promise<Domain.CTI[]> {
+  async findAll(filter?: FilterCtiDto): Promise<Domain.CTI[]> {
+    const query: any = {};
+
+    if (filter) {
+      if (filter.fromQuality) {
+        query.qualityValue = { $gte: filter.fromQuality };
+      }
+    }
+
+    console.log(query);
+
     return this.ctiModel
-      .find()
+      .find(query)
       .exec()
       .then((docs) => docs.map(CTIMapper.toDomain));
   }

@@ -5,6 +5,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  Query,
   Res,
 } from '@nestjs/common';
 import { CtisService } from './ctis.service';
@@ -14,12 +15,13 @@ import * as CTIModuleException from '../exceptions';
 import { Response, Request } from 'express';
 import { CTIMapper } from '../mapper/cti.mapper';
 import { GetUserId } from '@app/common-lib/auth/decorator/get-user-id.decorator';
+import { FilterCtiDto } from '../dto/filter-cti.dto';
 
 @Controller('ctis')
 export class CtisController {
   constructor(private readonly ctisService: CtisService) {}
 
-  private processException(exception: Exception, res: Response): void {
+  private static processException(exception: Exception, res: Response): void {
     switch (exception.constructor) {
       case CTIModuleException.CTINotFound:
         res.status(HttpStatus.NOT_FOUND);
@@ -63,7 +65,7 @@ export class CtisController {
     );
 
     if (result.isLeft()) {
-      this.processException(result.value, res);
+      CtisController.processException(result.value, res);
     } else {
       res.status(HttpStatus.OK);
       res.json(CTIMapper.toDTO(result.value.getValue()));
@@ -72,8 +74,8 @@ export class CtisController {
   }
 
   @Get()
-  async getAllCTIs(@Res() res: Response) {
-    const ctis = await this.ctisService.getAllCTIs();
+  async getAllCTIs(@Res() res: Response, @Query() filterDto: FilterCtiDto) {
+    const ctis = await this.ctisService.getAllCTIs(filterDto);
 
     res.status(HttpStatus.OK);
     res.json({ data: ctis.map((cti) => CTIMapper.toDTO(cti)) });
@@ -85,7 +87,7 @@ export class CtisController {
     const result = await this.ctisService.getCTIById(id);
 
     if (result.isLeft()) {
-      this.processException(result.value, res);
+      CtisController.processException(result.value, res);
     } else {
       res.status(HttpStatus.OK);
       res.json(CTIMapper.toDTO(result.value));

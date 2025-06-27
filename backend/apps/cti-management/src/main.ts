@@ -1,6 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { CtiManagementModule } from '../cti-management.module';
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ctisEnv } from './modules/ctis/config/envs';
 
 async function bootstrap() {
   const app = await NestFactory.create(CtiManagementModule);
@@ -17,6 +19,6 @@ async function bootstrap() {
 
   app.enableCors();
 
-  await app.listen(process.env.port ?? 3002);
+  await app.listen(ctisEnv.port);
 }
 bootstrap();
