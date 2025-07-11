@@ -11,18 +11,11 @@ import {
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { UsersService } from './users.service';
-import * as Domain from '../domain';
 import { CreateOrganizationDto } from '../dto/create-organization.dto';
-import { DomainError } from '@app/common-lib/core/exceptions/domain-error';
-import { Result } from '@app/common-lib/core/logic/Result';
 import * as UserModuleException from '../exceptions';
 import { Public } from '@app/common-lib/auth/decorator/public.decorator';
 import { Exception } from '@app/common-lib/core/exceptions/Exception';
-import { Roles } from '@app/common-lib/auth/decorator/role.decorator';
-import { Role } from '@app/common-lib/auth/enum/role.enum';
-import { RolesGuard } from '@app/common-lib/auth/roles.guard';
 import { OrganizationMapper } from '../mapper/organization.mapper';
-import { GetUserId } from '@app/common-lib/auth/decorator/get-user-id.decorator';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
 @Controller('organizations')
@@ -34,7 +27,7 @@ export class UsersController {
       case UserModuleException.PasswordIsNotValid:
         res.status(HttpStatus.UNPROCESSABLE_ENTITY);
         res.json({ errors: { message: exception.errorValue().message } });
-        res.send();
+        res.end();
         return;
       case UserModuleException.OrganizationNameIsTaken:
         res.status(HttpStatus.CONFLICT);
@@ -44,17 +37,17 @@ export class UsersController {
       case UserModuleException.OrganizationNotFound:
         res.status(HttpStatus.NOT_FOUND);
         res.json({ errors: { message: exception.errorValue().message } });
-        res.send();
+        res.end();
         return;
       case UserModuleException.OrganizationNotCreated:
         res.status(HttpStatus.INTERNAL_SERVER_ERROR);
         res.json({ errors: { message: exception.errorValue().message } });
-        res.send();
+        res.end();
         return;
       default:
         res.status(HttpStatus.INTERNAL_SERVER_ERROR);
         res.json({ errors: { message: 'Internal server error' } });
-        res.send();
+        res.end();
     }
   }
 
@@ -76,7 +69,7 @@ export class UsersController {
       const location = `/organizations/${organization.getValue().id}`;
       res.status(HttpStatus.OK);
       res.location(location);
-      res.send();
+      res.end();
     }
   }
 
@@ -91,6 +84,17 @@ export class UsersController {
     return result.value.getValue();
   }
 
+  @MessagePattern({ cmd: 'get_role' })
+  async getOrganizationRole(data: string): Promise<string> {
+    const result = await this.usersService.getRoleFromOrg(data);
+
+    if (result.isLeft()) {
+      return 'ERROR';
+    }
+
+    return result.value.getValue();
+  }
+
   @MessagePattern({ cmd: 'update_reputation' })
   async updateOrganizationReputation(data: {
     orgId: string;
@@ -99,10 +103,6 @@ export class UsersController {
     const result = await this.usersService.updateOrganizationReputation(
       data.orgId,
       data.newReputation,
-    );
-
-    console.log(
-      `Updating reputation for org ${data.orgId} to ${data.newReputation}`,
     );
 
     if (result.isLeft()) {
@@ -134,7 +134,7 @@ export class UsersController {
     } else {
       res.status(HttpStatus.OK);
       res.json(result.value.getValue());
-      res.send();
+      res.end();
     }
   }
 
@@ -150,7 +150,7 @@ export class UsersController {
     } else {
       res.status(HttpStatus.OK);
       res.json(result.value.getValue());
-      res.send();
+      res.end();
     }
   }
 }

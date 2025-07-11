@@ -80,14 +80,6 @@ export default function STIXFileUploader(props: STIXFileUploaderProps) {
               "The selected file does not complain with the STIX format. Please select a valid STIX file."
             );
             break;
-          case 500:
-            props.setShowAlert(true);
-            props.setAlertVariant("danger");
-            props.setAlertHeader("Internal Server Error");
-            props.setAlertMessage(
-              "An error occurred while processing your request. Please try again later."
-            );
-            break;
           default:
             props.setShowAlert(true);
             props.setAlertVariant("danger");
@@ -113,7 +105,10 @@ export default function STIXFileUploader(props: STIXFileUploaderProps) {
     if (!file) return;
 
     if (file.type !== "application/json") {
-      alert("Por favor selecciona un archivo .json válido");
+      props.setAlertHeader("Invalid File Type");
+      props.setAlertMessage("Please select a valid JSON file.");
+      props.setAlertVariant("danger");
+      props.setShowAlert(true);
       return;
     }
 
@@ -125,8 +120,6 @@ export default function STIXFileUploader(props: STIXFileUploaderProps) {
           setJsonData(json);
           setDisableSelectButton([true]);
           setShowUploadButton(true);
-        } else {
-          throw new Error("Error reading file");
         }
       } catch (error) {
         console.log(error);

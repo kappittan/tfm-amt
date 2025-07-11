@@ -26,27 +26,27 @@ export class CtisController {
       case CTIModuleException.CTINotFound:
         res.status(HttpStatus.NOT_FOUND);
         res.json({ errors: { message: exception.errorValue().message } });
-        res.send();
+        res.end();
         return;
       case CTIModuleException.InvalidSTIXFormat:
         res.status(HttpStatus.UNPROCESSABLE_ENTITY);
         res.json({ errors: { message: exception.errorValue().message } });
-        res.send();
+        res.end();
         return;
       case CTIModuleException.CTIAssessmentModuleError:
         res.status(HttpStatus.INTERNAL_SERVER_ERROR);
         res.json({ errors: { message: exception.errorValue().message } });
-        res.send();
+        res.end();
         return;
       case CTIModuleException.OrganizationNotFound:
         res.status(HttpStatus.NOT_FOUND);
         res.json({ errors: { message: exception.errorValue().message } });
-        res.send();
+        res.end();
         return;
       default:
         res.status(HttpStatus.INTERNAL_SERVER_ERROR);
         res.json({ errors: { message: 'Internal server error' } });
-        res.send();
+        res.end();
         return;
     }
   }
@@ -69,29 +69,34 @@ export class CtisController {
     } else {
       res.status(HttpStatus.OK);
       res.json(CTIMapper.toDTO(result.value.getValue()));
-      res.send();
+      res.end();
     }
   }
 
-  @Get()
-  async getAllCTIs(@Res() res: Response, @Query() filterDto: FilterCtiDto) {
-    const ctis = await this.ctisService.getAllCTIs(filterDto);
-
-    res.status(HttpStatus.OK);
-    res.json({ data: ctis.map((cti) => CTIMapper.toDTO(cti)) });
-    res.end();
-  }
-
-  @Get(':id')
+  @Get('/content/:id')
   async getCTI(@Param('id') id: string, @Res() res: Response) {
+    console.log('Entra en getCTI');
     const result = await this.ctisService.getCTIById(id);
 
     if (result.isLeft()) {
       CtisController.processException(result.value, res);
     } else {
       res.status(HttpStatus.OK);
-      res.json(CTIMapper.toDTO(result.value));
-      res.send();
+      res.json(CTIMapper.toDTOContent(result.value));
+      res.end();
     }
+  }
+
+  @Get()
+  async getAllCTIs(
+    @Res() res: Response,
+    @GetUserId() userId: string,
+    @Query() filterDto: FilterCtiDto,
+  ) {
+    const ctis = await this.ctisService.getAllCTIs(userId, filterDto);
+
+    res.status(HttpStatus.OK);
+    res.json({ data: ctis.map((cti) => CTIMapper.toDTO(cti)) });
+    res.end();
   }
 }

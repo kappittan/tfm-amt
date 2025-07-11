@@ -1,0 +1,181 @@
+{
+    "type": 10,
+    "spec_version": 10,
+    "id": 10,
+    "created": 10,
+    "modified": 10,
+    "created_by_ref": 8,
+    "revoked": 6,
+    "labels": 6,
+    "confidence": 7,
+    "lang": 5,
+    "external_references": 9,
+    "object_marking_refs": 6,
+    "granular_markings": 6,
+    "defanged": 5,
+    "extensions": 5,
+    
+    "attack-pattern": {
+        "name": 10,
+        "description": 8,
+        "aliases": 7,
+        "kill_chain_phases": 7
+    },
+    "campaign": {
+        "name": 10,
+        "description": 8,
+        "aliases": 7,
+        "first_seen": 6,
+        "last_seen": 6,
+        "objective": 7
+    },
+    "identity": {
+        "name": 10,
+        "description": 9,
+        "roles": 6,
+        "identity_class": 7,
+        "sectors": 7,
+        "contact_information": 9
+    },
+    "course-of-action": {
+        "name": 10,
+        "description": 8,
+        "action": 7
+    },
+    "grouping": {
+        "name": 6,
+        "description": 6,
+        "context": 10,
+        "object_refs": 10
+    },
+    "indicator": {
+        "name": 7,
+        "description": 8,
+        "indicator_types": 8,
+        "pattern": 10,
+        "pattern_type": 10,
+        "pattern_version": 6,
+        "valid_from": 5,
+        "valid_until": 8,
+        "kill_chain_phases": 7
+    },
+    "infrastructure": {
+        "name": 10,
+        "description": 8,
+        "infrastructure_types": 7,
+        "aliases": 6,
+        "kill_chain_phases": 7,
+        "first_seen": 5,
+        "last_seen": 6
+    },
+    "intrusion-set": {
+        "name": 10,
+        "description": 8,
+        "aliases": 6,
+        "first_seen": 5,
+        "last_seen": 6,
+        "goals": 8,
+        "resource_level": 6,
+        "primary_motivation": 7,
+        "secondary_motivation": 6
+    },
+    "location": {
+        "name": 7,
+        "description": 8,
+        "latitude": 5,
+        "longitude": 5,
+        "precision": 5,
+        "region": 7,
+        "country": 8,
+        "administrative_area": 5,
+        "city": 7,
+        "street_address": 5,
+        "postal_code": 4
+    },
+    "malware": {
+        "name": 8,
+        "description": 9,
+        "malware_types": 9,
+        "aliases": 6,
+        "is_family": 10,
+        "kill_chain_phases": 6,
+        "first_seen": 6,
+        "last_seen": 6,
+        "implementation_languages": 5,
+        "sample_refs": 6,
+        "operating_systems_refs": 8,
+        "architecture_execution_envs": 7,
+        "capabilities": 8
+    },
+    "note": {
+        "abstract": 8,
+        "content": 10,
+        "authors": 5,
+        "object_refs": 10
+    },
+    "malware-analysis": {
+        "result": 9,
+        "analysis_sco_refs": 9,
+        "sample_ref": 5,
+        "result_name": 9,
+        "analysis_ended": 5,
+        "analysis_started": 5,
+        "submitted": 5,
+        "analysis_definition_version": 5,
+        "analysis_engine_version": 5,
+        "modules": 5,
+        "configuration_version": 5,
+        "installed_software_refs": 5,
+        "operating_systems_refs": 5,
+        "host_vm_ref": 5,
+        "version": 5,
+        "product": 10
+    },
+    "observed-data": {
+        "first_observed": 10,
+        "last_observed": 10,
+        "number_observed": 10,
+        "objects": 6,
+        "object_refs": 8
+    },
+    "opinion": {
+        "opinion": 10,
+        "explaination": 9,
+        "authors": 7,
+        "object_refs": 10
+    },
+    "reports": {
+        "name": 10,
+        "description": 7,
+        "report_types": 8,
+        "published": 5,
+        "object_refs": 10
+    },
+    "threat-actor": {
+        "name": 10,
+        "description": 9,
+        "threat_actor_type": 8,
+        "aliases": 7,
+        "first_seen": 7, 
+        "last_seen": 7,
+        "personal_motivations": 6,
+        "roles": 6,
+        "goals": 8,
+        "sophistication": 8,
+        "resource_level": 7,
+        "primary_motivation": 6,
+        "secondary_motivation": 6
+    },
+    "tool": {
+        "name": 10,
+        "description": 9,
+        "tool_types": 9,
+        "aliases": 6,
+        "kill_chain_phases": 8,
+        "tool_version": 5
+    },
+    "vulnerability": {
+        "name": 10,
+        "description": 9
+    }
+}

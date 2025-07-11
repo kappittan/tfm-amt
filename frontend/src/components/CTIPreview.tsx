@@ -1,3 +1,4 @@
+import axios, { AxiosError } from "axios";
 import { Container, Row, Col, Badge, Button } from "react-bootstrap";
 
 interface CTIPreviewProps {
@@ -7,11 +8,80 @@ interface CTIPreviewProps {
   ctiOwner: string;
   ctiQualityValue: number;
   ctiSharedAt: Date;
+  setShowAlert: (show: boolean) => void;
+  setAlertVariant: (variant: string) => void;
+  setAlertHeader: (header: string) => void;
+  setAlertMessage: (message: string) => void;
 }
 
 export function CTIPreview(props: CTIPreviewProps) {
-  const handleClick = () => {
-    alert(props.ctiId);
+  const handleClick = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3002/ctis/content/${props.ctiId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      const content = response.data.content;
+
+      const json =
+        typeof content === "string"
+          ? content
+          : JSON.stringify(content, null, 2);
+
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `cti-${props.ctiId}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      const error = err as AxiosError;
+      if (error.response) {
+        switch (error.response.status) {
+          case 400:
+            props.setShowAlert(true);
+            props.setAlertVariant("danger");
+            props.setAlertHeader("Bad Request");
+            props.setAlertMessage("Incorrect format.");
+            break;
+          case 404:
+            props.setShowAlert(true);
+            props.setAlertVariant("danger");
+            props.setAlertHeader("File not found");
+            props.setAlertMessage(
+              "The file does not exists in the platform database."
+            );
+            break;
+          default:
+            props.setShowAlert(true);
+            props.setAlertVariant("danger");
+            props.setAlertHeader("Internal Server Error");
+            props.setAlertMessage(
+              "An internal server error occurred. Please try again later."
+            );
+            break;
+        }
+      } else if (error.request) {
+        props.setShowAlert(true);
+        props.setAlertVariant("danger");
+        props.setAlertHeader("Network Error");
+        props.setAlertMessage(
+          "No response received from the server. Please check your network connection."
+        );
+      } else {
+        props.setShowAlert(true);
+        props.setAlertVariant("danger");
+        props.setAlertHeader("Error");
+        props.setAlertMessage("An unknown error occurred: " + error.message);
+      }
+    }
   };
 
   return (

@@ -56,7 +56,7 @@ export function OrganizationsSideBar(props: OrganizationsSideBarProps) {
         props.setShowAlert(true);
         props.setAlertVariant("danger");
         props.setAlertHeader("Error");
-        props.setAlertMessage("An unknown error occurred: " + error.message);
+        props.setAlertMessage("An unknown error occurred");
       }
     }
   };

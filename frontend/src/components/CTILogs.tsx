@@ -104,7 +104,7 @@ const mockCTIs = [
 
 export function CTILogs(props: CTILogsProps) {
   const [ctis, setCtis] = useState<CTIValues[]>([]);
-  const [filterQuality, setFilterQuality] = useState<number>(30);
+  const [filterQuality, setFilterQuality] = useState<number>(50);
 
   const handleChangeQuality = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -208,6 +208,10 @@ export function CTILogs(props: CTILogsProps) {
                   ctiOwner={cti.owner}
                   ctiQualityValue={cti.qualityValue}
                   ctiSharedAt={cti.sharedAt}
+                  setShowAlert={props.setShowAlert}
+                  setAlertHeader={props.setAlertHeader}
+                  setAlertMessage={props.setAlertMessage}
+                  setAlertVariant={props.setAlertVariant}
                 ></CTIPreview>
               </ListGroup.Item>
             </ListGroup>

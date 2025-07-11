@@ -119,7 +119,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var UsersController_1;
-var _a, _b, _c, _d, _e, _f, _g, _h;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UsersController = void 0;
 const common_1 = __webpack_require__(3);
@@ -182,9 +182,15 @@ let UsersController = UsersController_1 = class UsersController {
         }
         return result.value.getValue();
     }
+    async getOrganizationRole(data) {
+        const result = await this.usersService.getRoleFromOrg(data);
+        if (result.isLeft()) {
+            return 'ERROR';
+        }
+        return result.value.getValue();
+    }
     async updateOrganizationReputation(data) {
         const result = await this.usersService.updateOrganizationReputation(data.orgId, data.newReputation);
-        console.log(`Updating reputation for org ${data.orgId} to ${data.newReputation}`);
         if (result.isLeft()) {
             return 'ERROR';
         }
@@ -236,17 +242,23 @@ __decorate([
     __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
 ], UsersController.prototype, "getOrganizationReputation", null);
 __decorate([
+    (0, microservices_1.MessagePattern)({ cmd: 'get_role' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+], UsersController.prototype, "getOrganizationRole", null);
+__decorate([
     (0, microservices_1.MessagePattern)({ cmd: 'update_reputation' }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+    __metadata("design:returntype", typeof (_f = typeof Promise !== "undefined" && Promise) === "function" ? _f : Object)
 ], UsersController.prototype, "updateOrganizationReputation", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Get)(),
     __param(0, (0, common_1.Res)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_f = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _f : Object]),
+    __metadata("design:paramtypes", [typeof (_g = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _g : Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getAllOrganizations", null);
 __decorate([
@@ -254,7 +266,7 @@ __decorate([
     __param(0, (0, common_1.Res)()),
     __param(1, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_g = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _g : Object, String]),
+    __metadata("design:paramtypes", [typeof (_h = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _h : Object, String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getOrganizationById", null);
 __decorate([
@@ -262,7 +274,7 @@ __decorate([
     __param(0, (0, common_1.Res)()),
     __param(1, (0, common_1.Param)('name')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_h = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _h : Object, String]),
+    __metadata("design:paramtypes", [typeof (_j = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _j : Object, String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getOrganizationByName", null);
 exports.UsersController = UsersController = UsersController_1 = __decorate([
@@ -318,7 +330,7 @@ let UsersService = class UsersService {
             return (0, Either_1.left)(Exceptions.OrganizationNameIsTaken.create(organizationValues.name));
         }
         const result = Domain.Organization.create({
-            roles: [role_enum_1.Role.User],
+            roles: [role_enum_1.Role.User, role_enum_1.Role.LowTrust],
             name: organizationValues.name,
             password: passwordOrError.getValue(),
             description: organizationValues.description,
@@ -344,14 +356,50 @@ let UsersService = class UsersService {
         }
         return (0, Either_1.right)(Result_1.Result.ok(org.reputation));
     }
+    async getRoleFromOrg(orgId) {
+        const org = await this.organizationRepository.findById(orgId);
+        console.log('getRoleFromOrg');
+        console.log(org);
+        if (org === null) {
+            return (0, Either_1.left)(Exceptions.OrganizationNotFound.create(orgId));
+        }
+        console.log(org.roles);
+        return (0, Either_1.right)(Result_1.Result.ok(org.roles[1]));
+    }
     async updateOrganizationReputation(orgId, newReputation) {
         const org = await this.organizationRepository.findById(orgId);
         if (org === null) {
             return (0, Either_1.left)(Exceptions.OrganizationNotFound.create(orgId));
         }
         org.updateReputation(newReputation);
+        if (org.reputation >= 0.8) {
+            org.roles = [role_enum_1.Role.User, role_enum_1.Role.HighTrust];
+        }
+        else if (org.reputation >= 0.6) {
+            org.roles = [role_enum_1.Role.User, role_enum_1.Role.MediumTrust];
+        }
+        else {
+            org.roles = [role_enum_1.Role.User, role_enum_1.Role.LowTrust];
+        }
         await this.organizationRepository.save(org);
         return (0, Either_1.right)(Result_1.Result.ok());
+    }
+    async hello(orgId) {
+        const org = await this.organizationRepository.findById(orgId);
+        if (org === null) {
+            return (0, Either_1.left)(Exceptions.OrganizationNotFound.create(orgId));
+        }
+        if (org.reputation >= 0.8) {
+            org.roles = [role_enum_1.Role.User, role_enum_1.Role.HighTrust];
+        }
+        else if (org.reputation >= 0.6) {
+            org.roles = [role_enum_1.Role.User, role_enum_1.Role.MediumTrust];
+            console.log(`Organization ${org.name} has Medium Trust role ${org.roles}`);
+        }
+        else {
+            org.roles = [role_enum_1.Role.User, role_enum_1.Role.LowTrust];
+        }
+        await this.organizationRepository.save(org);
     }
     async getOrganizationById(id) {
         const org = await this.organizationRepository.findById(id);
@@ -862,6 +910,9 @@ var Role;
 (function (Role) {
     Role["User"] = "user";
     Role["Admin"] = "admin";
+    Role["HighTrust"] = "high-trust";
+    Role["MediumTrust"] = "medium-trust";
+    Role["LowTrust"] = "low-trust";
 })(Role || (exports.Role = Role = {}));
 
 
@@ -1475,14 +1526,15 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.orgsEnv = void 0;
 const dotenv = __webpack_require__(51);
 const path = __webpack_require__(52);
+console.log('Se está ejecutando el config');
 const config = dotenv.config({
-    path: path.resolve(__dirname, '../..', '.env'),
+    path: path.resolve(__dirname, '.env'),
 });
 exports.orgsEnv = {
-    host: process.env.HOST || '127.0.0.1',
+    host: process.env.HOST || '0.0.0.0',
     restPort: process.env.REST_PORT ? parseInt(process.env.REST_PORT, 10) : 3001,
     tcpPort: process.env.TCP_PORT ? parseInt(process.env.TCP_PORT, 10) : 3003,
-    postgresHost: process.env.POSTGRES_HOST || '127.0.0.1',
+    postgresHost: process.env.POSTGRES_HOST,
     postgresPort: process.env.POSTGRES_PORT
         ? parseInt(process.env.POSTGRES_PORT, 10)
         : 5432,

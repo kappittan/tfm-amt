@@ -16,21 +16,52 @@ export class CTIMongoRepository extends CTIRepository {
     super();
   }
 
-  async findAll(filter?: FilterCtiDto): Promise<Domain.CTI[]> {
+  async findAll(
+    filter: FilterCtiDto,
+    role: string,
+    orgId: string,
+  ): Promise<Domain.CTI[]> {
     const query: any = {};
 
-    if (filter) {
-      if (filter.fromQuality) {
+    switch (role) {
+      case 'high-trust':
         query.qualityValue = { $gte: filter.fromQuality };
-      }
+        break;
+      case 'medium-trust':
+        if (filter.fromQuality > 0.8) {
+          query.qualityValue = { $lte: 0.8 };
+        } else {
+          query.qualityValue = {
+            $gte: filter.fromQuality,
+            $lte: 0.8,
+          };
+        }
+        break;
+      case 'low-trust':
+        if (filter.fromQuality > 0.6) {
+          query.qualityValue = { $lte: 0.6 };
+        } else {
+          query.qualityValue = {
+            $gte: filter.fromQuality,
+            $lte: 0.6,
+          };
+          break;
+        }
+        console.log(role);
+        console.log(query);
     }
 
-    console.log(query);
+    const results = await this.ctiModel
+      .find({
+        $or: [{ qualityValue: query.qualityValue }, { owner: orgId }],
+      })
+      .exec();
 
-    return this.ctiModel
-      .find(query)
-      .exec()
-      .then((docs) => docs.map(CTIMapper.toDomain));
+    if (results === null) {
+      return null;
+    }
+
+    return results.map((doc) => CTIMapper.toDomain(doc));
   }
 
   async save(cti: Domain.CTI): Promise<Domain.CTI> {
@@ -41,15 +72,13 @@ export class CTIMongoRepository extends CTIRepository {
   }
 
   async findById(id: string): Promise<Domain.CTI> {
-    const result = this.ctiModel
-      .findOne({ id })
-      .exec()
-      .then(CTIMapper.toDomain);
+    console.log(id);
+    const result = await this.ctiModel.findOne({ id }).exec();
 
-    if (!result) {
+    if (result == null) {
       return null;
     }
 
-    return result;
+    return CTIMapper.toDomain(result);
   }
 }

@@ -16,8 +16,8 @@ export const ctisEnv = {
   usersPort: process.env.USERS_TCP_PORT
     ? parseInt(process.env.USERS_TCP_PORT, 10)
     : 3003,
-  usersHost: process.env.USERS_HOST || '127.0.0.1',
-  mongoHost: process.env.MONGO_HOST || '127.0.0.1',
+  usersHost: process.env.USERS_HOST || 'ctishield-users',
+  mongoHost: process.env.MONGO_HOST || 'ctishield-mongo',
   mongoPort: process.env.MONGO_PORT
     ? parseInt(process.env.MONGO_PORT, 10)
     : 27017,

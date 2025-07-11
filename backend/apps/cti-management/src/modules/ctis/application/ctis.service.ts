@@ -26,8 +26,9 @@ export class CtisService {
     @Inject('USER_SERVICE') private client: ClientProxy,
   ) {}
 
-  async getAllCTIs(filter?: FilterCtiDto): Promise<Domain.CTI[]> {
-    return await this.ctiRepository.findAll(filter);
+  async getAllCTIs(orgId: string, filter: FilterCtiDto): Promise<Domain.CTI[]> {
+    const role = await this.getOrganizationRole(orgId);
+    return await this.ctiRepository.findAll(filter, role, orgId);
   }
 
   async getCTIById(
@@ -59,7 +60,7 @@ export class CtisService {
       // 1. Assess the quality of the CTI
       // 1.1. Make a request to the CTI assessment service
       const response = await axios.post<CTIAssessmentResponse>(
-        'http://localhost:4001/assess',
+        'http://ctishield-assess:4001/assess',
         content,
       );
       const data = response.data;
@@ -125,6 +126,13 @@ export class CtisService {
 
   async getOrganizationReputation(orgId: string) {
     const pattern = { cmd: 'get_reputation' };
+    const payload = orgId;
+
+    return await firstValueFrom(this.client.send(pattern, payload));
+  }
+
+  async getOrganizationRole(orgId: string): Promise<string> {
+    const pattern = { cmd: 'get_role' };
     const payload = orgId;
 
     return await firstValueFrom(this.client.send(pattern, payload));

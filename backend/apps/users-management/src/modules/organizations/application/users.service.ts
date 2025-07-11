@@ -44,7 +44,7 @@ export class UsersService {
 
     // Create the new organization
     const result = Domain.Organization.create({
-      roles: [Role.User],
+      roles: [Role.User, Role.LowTrust],
       name: organizationValues.name,
       password: passwordOrError.getValue(),
       description: organizationValues.description,
@@ -86,6 +86,22 @@ export class UsersService {
     return right(Result.ok(org.reputation));
   }
 
+  async getRoleFromOrg(
+    orgId: string,
+  ): Promise<Either<Exceptions.OrganizationNotFound, Result<string>>> {
+    const org = await this.organizationRepository.findById(orgId);
+    console.log('getRoleFromOrg');
+    console.log(org);
+
+    if (org === null) {
+      return left(Exceptions.OrganizationNotFound.create(orgId));
+    }
+
+    console.log(org.roles);
+
+    return right(Result.ok(org.roles[1]));
+  }
+
   async updateOrganizationReputation(
     orgId: string,
     newReputation: number,
@@ -97,9 +113,39 @@ export class UsersService {
     }
 
     org.updateReputation(newReputation);
+
+    if (org.reputation >= 0.8) {
+      org.roles = [Role.User, Role.HighTrust];
+    } else if (org.reputation >= 0.6) {
+      org.roles = [Role.User, Role.MediumTrust];
+    } else {
+      org.roles = [Role.User, Role.LowTrust];
+    }
+
     await this.organizationRepository.save(org);
 
     return right(Result.ok());
+  }
+
+  async hello(orgId: string) {
+    const org = await this.organizationRepository.findById(orgId);
+
+    if (org === null) {
+      return left(Exceptions.OrganizationNotFound.create(orgId));
+    }
+
+    if (org.reputation >= 0.8) {
+      org.roles = [Role.User, Role.HighTrust];
+    } else if (org.reputation >= 0.6) {
+      org.roles = [Role.User, Role.MediumTrust];
+      console.log(
+        `Organization ${org.name} has Medium Trust role ${org.roles}`,
+      );
+    } else {
+      org.roles = [Role.User, Role.LowTrust];
+    }
+
+    await this.organizationRepository.save(org);
   }
 
   async getOrganizationById(

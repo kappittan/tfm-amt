@@ -2,24 +2,57 @@
 version: '3.1'
 
 services:
-  db-postgres:
+  ctishield-postgres:
     image: postgres:latest
-    container_name: tfm-postgres
+    container_name: ctishield-postgres
+    networks:
+      - ctishield-network
     ports:
       - '5432:5432'
     environment:
-      POSTGRES_HOST: localhost
+      POSTGRES_HOST: 0.0.0.0
       POSTGRES_PORT: 5432
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root
       POSTGRES_DB: test
 
-  mongo:
+  ctishield-mongo:
     image: mongo
-    container_name: tfm-mongo
+    container_name: ctishield-mongo
+    networks:
+      - ctishield-network
     ports:
       - '27017:27017'
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
+
+  ctishield-users:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        COMMAND: start:users
+    container_name: ctishield-users
+    networks:
+      - ctishield-network
+    ports:
+      - '3001:3001'
+      - '3003:3003'
+
+  ctishield-ctis:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        COMMAND: start:ctis
+    container_name: ctishield-ctis
+    networks:
+      - ctishield-network
+    ports:
+      - '3002:3002'
+
+networks:
+  ctishield-network:
+    external: true

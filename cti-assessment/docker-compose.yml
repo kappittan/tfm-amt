@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  ctishield-assess:
+    build:
+      context: ./assess
+      dockerfile: Dockerfile
+    container_name: ctishield-assess
+    networks:
+      - ctishield-network
+    ports:
+      - "4001:4001"
+
+  ctishield-models:
+    build:
+      context: ./models
+      dockerfile: Dockerfile
+    container_name: ctishield-models
+    networks:
+      - ctishield-network
+    ports:
+      - "4002:4002"
+
+networks:
+  ctishield-network:
+    external: true

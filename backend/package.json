@@ -7,6 +7,10 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
+    "build:users": "nest build users-management",
+    "build:ctis": "nest build cti-mangement",
+    "start:users": "nest start users-management",
+    "start:ctis": "nest start cti-management",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
