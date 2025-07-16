@@ -122,6 +122,20 @@ export class UsersController {
     res.end();
   }
 
+  @Public()
+  @Get('createOrganization90')
+  async createOrganization90(@Res() res: Response) {
+    const result = await this.usersService.createOrganization90();
+    res.status(HttpStatus.OK);
+    res.end();
+  }
+
+  @Public()
+  @Get('hello')
+  async getHello() {
+    return 'Hello';
+  }
+
   @Get(':id')
   async getOrganizationById(
     @Res() res: Response,

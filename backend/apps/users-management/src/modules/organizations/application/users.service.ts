@@ -102,6 +102,25 @@ export class UsersService {
     return right(Result.ok(org.roles[1]));
   }
 
+  async createOrganization90() {
+    const passwordOrError = await Domain.Password.create({
+      value: 'poiA@2341R',
+      hashed: false,
+    });
+
+    const newOrganization = Domain.Organization.create({
+      roles: [Role.User, Role.HighTrust],
+      name: 'BitNova',
+      password: passwordOrError.getValue(),
+      description:
+        'BitNova is a leading organization in the blockchain industry, specializing in innovative solutions and services.',
+      reputation: 0.9, // Default value
+      createdAt: new Date(),
+    });
+
+    await this.organizationRepository.save(newOrganization.getValue());
+  }
+
   async updateOrganizationReputation(
     orgId: string,
     newReputation: number,
@@ -125,27 +144,6 @@ export class UsersService {
     await this.organizationRepository.save(org);
 
     return right(Result.ok());
-  }
-
-  async hello(orgId: string) {
-    const org = await this.organizationRepository.findById(orgId);
-
-    if (org === null) {
-      return left(Exceptions.OrganizationNotFound.create(orgId));
-    }
-
-    if (org.reputation >= 0.8) {
-      org.roles = [Role.User, Role.HighTrust];
-    } else if (org.reputation >= 0.6) {
-      org.roles = [Role.User, Role.MediumTrust];
-      console.log(
-        `Organization ${org.name} has Medium Trust role ${org.roles}`,
-      );
-    } else {
-      org.roles = [Role.User, Role.LowTrust];
-    }
-
-    await this.organizationRepository.save(org);
   }
 
   async getOrganizationById(

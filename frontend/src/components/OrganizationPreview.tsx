@@ -19,6 +19,8 @@ export function OrganizationPreview({
     variant = "success";
   }
 
+  const percentage = Math.round(organizationReputation * 100);
+
   return (
     <Container>
       <Row>
@@ -32,6 +34,7 @@ export function OrganizationPreview({
             className="mt-1"
             variant={variant}
             now={organizationReputation * 100}
+            label={`${percentage}%`}
           />
         </Col>
       </Row>

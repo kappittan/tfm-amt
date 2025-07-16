@@ -18,16 +18,11 @@ async def cti_assessment(request: Request):
         if not interoperability_score:
             raise STIXFormatError("STIX object does not meet interoperability requirements.")
         weights = load_weights()
-        print("hola")
-        completeness_score = completeness(stix_str, weights)
-        print(f"Completeness score: {completeness_score}")
-        verifiability_score = verifiability(stix_str)
-        print(f"Verifiability score: {verifiability_score}")
-        consistency_score = consistency(stix_str)
-        print(f"Consistency score: {consistency_score}")
-        timeliness_score = timeliness(stix_str)
-        print(f"Timeliness score: {timeliness_score}")
 
+        completeness_score = completeness(stix_str, weights)
+        verifiability_score = verifiability(stix_str)
+        consistency_score = consistency(stix_str)
+        timeliness_score = timeliness(stix_str)
 
         return {
             "interoperability": interoperability_score,

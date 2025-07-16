@@ -1,0 +1,13 @@
+{
+    "type": "indicator",
+    "spec_version": "2.1",
+    "id": "indicator--b32e5f6f-28fa-44e2-944e-94efe09dfd0a",
+    "created": "2025-06-27T10:31:00.238098Z",
+    "modified": "2025-06-27T10:31:00.238098Z",
+    "name": "IP Botnet MScript",
+    "description": "This indicator represents a botnet using MScript",
+    "pattern": "[ipv4-addr:value = '192.168.98.76/32']",
+    "pattern_type": "stix",
+    "pattern_version": "2.1",
+    "valid_from": "2025-06-27T10:31:00.238096Z"
+}

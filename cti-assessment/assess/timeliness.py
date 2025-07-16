@@ -172,35 +172,3 @@ def timeliness_circl_api(cve_id):
     except KeyError as e:
         raise APIError(f"Missing expected key in CIRCL API response: {e}")
 
-
-stix_obj1 = parse("""{
-
-  "type": "vulnerability",
-
-  "spec_version": "2.1",
-
-  "id": "vulnerability--0c7b5b88-8ff7-4a4d-aa9d-feb398cd0061",
-
-  "created": "2024-09-12T08:17:27.065522Z",
-
-  "modified": "2024-09-12T08:17:27.065522Z",
-
-  "created_by_ref": "identity--f431f809-377b-45e0-aa1c-6a4751cae5ff",
-
-  "name": "CVE-2016-1234",
-
-  "external_references": [
-
-    {
-
-      "source_name": "cve",
-
-      "external_id": "CVE-2016-1234"
-
-    }
-
-  ]
-
-}""")
-
-print(timeliness(stix_obj1))

@@ -7,6 +7,12 @@ start:
 		docker compose -f $$d/docker-compose.yml up -d; \
 	done
 
+build:
+	@for d in $(SERVICES); do \
+		echo "Running $$d..."; \
+		docker compose -f $$d/docker-compose.yml up --build -d; \
+	done
+
 stop:
 	@for d in $(SERVICES); do \
 		echo "Stoping $$d..."; \

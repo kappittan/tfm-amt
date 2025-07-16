@@ -1,0 +1,22 @@
+{
+    "type": "indicator",
+    "spec_version": "2.1",
+    "id": "indicator--33c85c4c-c140-4d2a-ad39-f08eb337c92f",
+    "created": "2025-06-27T10:31:00.236154Z",
+    "modified": "2025-06-27T10:31:00.236154Z",
+    "name": "IP Botnet CobaltStrike",
+    "description": "This indicator represents a botnet using CobaltStrike",
+    "indicator_types": [
+        "anomalous-activity"
+    ],
+    "pattern": "[ipv4-addr:value = '47.92.91.213:443']",
+    "pattern_type": "stix",
+    "pattern_version": "2.1",
+    "valid_from": "2025-06-27T10:31:00.236148Z",
+    "external_references": [
+        {
+            "source_name": "imperva",
+            "url": "https://www.imperva.com/learn/application-security/cobalt-strike/"
+        }
+    ]
+}

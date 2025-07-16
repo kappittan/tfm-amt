@@ -1,0 +1,13 @@
+{
+    "type": "indicator",
+    "spec_version": "2.1",
+    "id": "indicator--7a48e9a8-6527-4a15-af7d-6d8aae3f8106",
+    "created": "2025-07-15T16:10:00.838451Z",
+    "modified": "2025-07-15T16:10:00.838451Z",
+    "name": "IP Botnet RedBeacon",
+    "description": "This indicator is believed to be part of a RedBeacon infrastructure, used in pre-ransomware operations targeting financial institutions in South America.",
+    "pattern": "[ipv4-addr:value = '185.200.65.34:8080']",
+    "pattern_type": "stix",
+    "pattern_version": "2.1",
+    "valid_from": "2025-07-15T16:10:00.838444Z"
+}

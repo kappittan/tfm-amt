@@ -1,0 +1,16 @@
+{
+    "type": "indicator",
+    "spec_version": "2.1",
+    "id": "indicator--016051e9-24bb-4956-9508-38edff85649c",
+    "created": "2025-07-15T16:10:00.835843Z",
+    "modified": "2025-07-15T16:10:00.835843Z",
+    "name": "IP Botnet BlueStrike",
+    "description": "This indicator represents a botnet associated with the BlueStrike malware, often linked to East Asian threat actors.",
+    "indicator_types": [
+        "malicious-activity"
+    ],
+    "pattern": "[ipv4-addr:value = '102.45.67.89:443']",
+    "pattern_type": "stix",
+    "pattern_version": "2.1",
+    "valid_from": "2025-07-15T16:10:00.835835Z"
+}

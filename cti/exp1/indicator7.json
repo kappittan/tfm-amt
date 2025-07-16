@@ -1,0 +1,13 @@
+{
+    "type": "indicator",
+    "spec_version": "2.1",
+    "id": "indicator--4c869e3b-0862-493b-bbda-d0e4865a855d",
+    "created": "2025-06-27T10:31:00.237869Z",
+    "modified": "2025-06-27T10:31:00.237869Z",
+    "name": "IP Botnet Porter",
+    "description": "This indicator represents a botnet using Porter",
+    "pattern": "[ipv4-addr:value = '192.168.23.45/32']",
+    "pattern_type": "stix",
+    "pattern_version": "2.1",
+    "valid_from": "2025-06-27T10:31:00.237866Z"
+}

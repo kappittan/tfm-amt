@@ -82,10 +82,17 @@ export class CtisService {
         return left(Exception.OrganizationNotFound.create(owner));
       }
 
-      const newReputation = this.getReputationFromQualityValue(
+      let newReputation = this.getReputationFromQualityValue(
         previousReputation,
         qualityValue,
       );
+
+      if (newReputation < 0) {
+        newReputation = 0;
+      }
+      if (newReputation > 1) {
+        newReputation = 1;
+      }
 
       const update = await this.updateOrganizationReputation(
         owner,

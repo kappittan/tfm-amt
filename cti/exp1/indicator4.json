@@ -1,0 +1,22 @@
+{
+    "type": "indicator",
+    "spec_version": "2.1",
+    "id": "indicator--7e9430a7-bfbf-4f76-a094-1d4eefa8f5fc",
+    "created": "2025-06-27T10:31:00.236891Z",
+    "modified": "2025-06-27T10:31:00.236891Z",
+    "name": "IP related to QakBot",
+    "description": "This indicator represents an IP address related to QakBot malware",
+    "indicator_types": [
+        "anomalous-activity"
+    ],
+    "pattern": "[ipv4-addr:value = '38.54.15.75:19174']",
+    "pattern_type": "stix",
+    "pattern_version": "2.1",
+    "valid_from": "2025-06-27T10:31:00.236888Z",
+    "external_references": [
+        {
+            "source_name": "checkpoint",
+            "url": "https://www.checkpoint.com/es/cyber-hub/threat-prevention/what-is-malware/qakbot-malware/"
+        }
+    ]
+}
